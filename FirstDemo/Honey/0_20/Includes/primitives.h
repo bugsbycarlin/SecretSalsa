@@ -63,6 +63,22 @@ namespace Honey {
   };
 
   /*!
+    mouseEvent holds a single mouse event, comprised of two strings and two coordinates.
+
+    Examples:
+    left, down, 100, 100
+    none, move, 110, 100
+    none, move, 110, 110
+    left, up, 110, 110
+  */
+  struct mouseEvent {
+    string button;
+    string event;
+    int x;
+    int y;
+  };
+
+  /*!
     <pre>
     \typdef settings is a cheap way to build settings dictionaries like
       settings s = {

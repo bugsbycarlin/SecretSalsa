@@ -1,8 +1,12 @@
+/*
+  Secret Salsa First Demo
+  Matthew Carlin
+  Copyright 2019
+*/
+
 #include <string>
 
 #include "honey.h"
-
-using namespace Honey;
 
 #include <fstream>
 #include <string>
@@ -10,13 +14,10 @@ using namespace Honey;
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <stdio.h>
-
-#include "honey.h"
 
 using namespace std;
 using namespace Honey;

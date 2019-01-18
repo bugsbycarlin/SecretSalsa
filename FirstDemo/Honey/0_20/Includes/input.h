@@ -9,9 +9,11 @@
 #include <string>
 #include <stdlib.h>
 #include <unordered_map>
+#include <vector>
 
 #include <SDL2/SDL.h>
 
+#include "primitives.h"
 #include "timing.h"
 
 using namespace std;
@@ -230,6 +232,21 @@ namespace Honey {
     */
     void removeAction(string action);
 
+    /*!
+      Get a list of mouseEvents since the last processInput.
+
+      The list is in time order. Each event is a string button, a string action, and x, y coordinates.
+
+      Example list:
+      left, down, 100, 100
+      none, move, 110, 100
+      none, move, 110, 110
+      left, up, 110, 110
+      
+      @return vector of mouseEvents.
+    */
+    vector<mouseEvent> getMouseEvents();
+
    private:
     Input();
     ~Input();
@@ -242,6 +259,8 @@ namespace Honey {
     const string global_input_lock = "__global_input_lock__";
 
     unordered_map<string, string> action_to_key;
+
+    vector<mouseEvent> mouse_events;
 
     unordered_map<string, bool> down;
     unordered_map<string, bool> up;

@@ -48,6 +48,17 @@ namespace Honey {
     float distance(position p1, position p2);
 
     /*!
+      Get the distance between two positions represented in floats.
+      
+      @param x1 first x coordinate.
+      @param y1 first y coordinate.
+      @param x2 second x coordinate.
+      @param y2 second y coordinate.
+      @returns distance between x1,y1 and x2,y2.
+    */
+    float distance(float x1, float y1, float x2, float y2);
+
+    /*!
       For a line defined by p1 and p2 and a third point p3, get the closest point on the line.
 
       Note this may be outside the segment between p1 and p2.
