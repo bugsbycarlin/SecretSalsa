@@ -21,9 +21,10 @@ void Game::initialize() {
   screen_color = hot_config.getString("layout", "screen_color");
   screen_width = hot_config.getInt("layout", "screen_width");
   screen_height = hot_config.getInt("layout", "screen_height");
+  map_name = hot_config.getString("layout", "map_name");
 
   graphics.addImages("Maps/", {
-    "running_track",
+    map_name,
   });
 
   graphics.addImages("Art/", {
@@ -35,8 +36,8 @@ void Game::initialize() {
     "Character_Test_Frame_3_flip",
   });
 
-  map_width = graphics.getWidth("running_track");
-  map_height = graphics.getHeight("running_track");
+  map_width = graphics.getWidth(map_name);
+  map_height = graphics.getHeight(map_name);
 
   loadPath();
 
@@ -59,7 +60,7 @@ void Game::initialize() {
 }
 
 void Game::loadPath() {
-  std::ifstream input_file("Scripts/running_track_path.txt");
+  std::ifstream input_file("Scripts/" + map_name + "_path.txt");
 
   string line;
   int count = 0;
@@ -159,7 +160,7 @@ void Game::render() {
   // Switch to 2D drawing mode
   graphics.draw2D();
 
-  graphics.drawImage("running_track", -camera_x, -camera_y);
+  graphics.drawImage(map_name, -camera_x, -camera_y);
 
   string player_image = "Character_Test_Frame_" + to_string(frame) + ((player_direction == 1) ? "" : "_flip");
   graphics.drawImage(

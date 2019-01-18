@@ -2,6 +2,7 @@
   <param type="int" name="screen_width">1280</param>
   <param type="int" name="screen_height">720</param>
   <param type="bool" name="full_screen">false</param>
+  <param type="string" name="map_name">running_track</param>
   <param type="string" name="screen_color">#555555</param>
 
   <param type="int" name="font_x">30</param>

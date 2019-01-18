@@ -39,6 +39,7 @@ class Game : public Screen {
   int screen_width;
   int screen_height;
 
+  string map_name;
   int map_width;
   int map_height;
 
