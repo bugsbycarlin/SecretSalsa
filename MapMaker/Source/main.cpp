@@ -185,13 +185,17 @@ void load() {
       int x = stoi(words[0]);
       int y = stoi(words[1]);
       int r = stoi(words[2]);
-      for (int i = x - r; i < x + r; i++) {
-        for (int j = y - r; j < y + r; j++) {
-          if (i >= 0 && i < map_width && j >= 0 && j < map_width
-            && math_utils.distance(i,j,x,y) < r) {
-            map_pixel_status[i][j] = 1;
+      if (r > 1) {
+        for (int i = x - r; i <= x + r; i++) {
+          for (int j = y - r; j <= y + r; j++) {
+            if (i >= 0 && i < map_width && j >= 0 && j < map_width
+              && math_utils.distance(i,j,x,y) <= r) {
+              map_pixel_status[i][j] = 1;
+            }
           }
         }
+      } else if (r == 0) {
+        map_pixel_status[x][y] = 1;
       }
     }
     count++;
@@ -286,7 +290,8 @@ void save() {
   for (int k = min_map_x; k <= max_map_x; k++) {
     for (int l = min_map_y; l <= max_map_y; l++) {
       if (map_pixel_status[k][l] == 1 && save_pixels[k][l] != 1) {
-        map_pixel_status[k][l] = 2;
+        string output = to_string(k) + "," + to_string(l) + ",0\n";
+        output_file << output.c_str();
       }
     }
   }

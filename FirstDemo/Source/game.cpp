@@ -10,6 +10,11 @@ using namespace std;
 using namespace Honey;
 
 Game::Game() {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      extra_path[i][j] = {};
+    }
+  }
 }
 
 void Game::loop() {
@@ -71,7 +76,13 @@ void Game::loadPath() {
       int x = stoi(words[0]);
       int y = stoi(words[1]);
       int r = stoi(words[2]);
-      path.push_back({x,y,r});
+      if (r != 0) {
+        path.push_back({x,y,r});
+      } else {
+        int zone_x = x / (map_width / 8.0);
+        int zone_y = y / (map_height / 8.0);
+        extra_path[zone_x][zone_y].push_back({x,y,r});
+      }
     }
     count++;
   }
@@ -102,6 +113,18 @@ void Game::logic() {
   if (checkPath(new_player_x, new_player_y)) {
     player_x = new_player_x;
     player_y = new_player_y;
+  } else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy + bump_margin)) {
+    player_x = player_x + 0.5 * player_vx;
+    player_y = player_y + player_vy + bump_margin;
+  } else if (checkPath(player_x + player_vx + bump_margin, player_y + 0.5 * player_vy)) {
+    player_x = player_x + player_vx + bump_margin;
+    player_y = player_y + 0.5 * player_vy;
+  } else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy - bump_margin)) {
+    player_x = player_x + 0.5 * player_vx;
+    player_y = player_y + player_vy - bump_margin;
+  } else if (checkPath(player_x + player_vx - bump_margin, player_y + 0.5 * player_vy)) {
+    player_x = player_x + player_vx - bump_margin;
+    player_y = player_y + 0.5 * player_vy;
   }
   
   player_vx *= player_velocity_decay;
@@ -147,6 +170,13 @@ void Game::logic() {
 bool Game::checkPath(int x, int y) {
   for (map_circle circle : path) {
     if (math_utils.distance(x, y, circle.x, circle.y) <= circle.r) {
+      return true;
+    }
+  }
+  int zone_x = x / (map_width / 8.0);
+  int zone_y = y / (map_height / 8.0);
+  for (map_circle circle : extra_path[zone_x][zone_y]) {
+    if (x == circle.x && y == circle.y) {
       return true;
     }
   }

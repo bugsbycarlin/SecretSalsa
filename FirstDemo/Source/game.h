@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <array>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -55,6 +56,8 @@ class Game : public Screen {
   const float player_ay = 0.65;
   const float player_velocity_decay = 0.9;
 
+  const int bump_margin = 5;
+
   float running_animation_speed;
   int frame;
 
@@ -71,4 +74,5 @@ class Game : public Screen {
   };
 
   vector<map_circle> path;
+  std::array<std::array<vector<map_circle>, 8>, 8> extra_path;
 };
