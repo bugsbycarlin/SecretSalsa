@@ -1,6 +1,6 @@
 import os
 
-honey_version = "0_20"
+honey_version = "0_21"
 
 env=Environment()
 env.Append(CXXFLAGS = "-std=c++11")

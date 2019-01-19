@@ -107,32 +107,59 @@ void Game::logic() {
   if (player_vx < -player_max_velocity) player_vx = -player_max_velocity;
   if (player_vy > player_max_velocity) player_vy = player_max_velocity;
   if (player_vy < -player_max_velocity) player_vy = -player_max_velocity;
-  
-  int new_player_x = player_x + player_vx;
-  int new_player_y = player_y + player_vy;
-  if (checkPath(new_player_x, new_player_y)) {
-    player_x = new_player_x;
-    player_y = new_player_y;
-  } else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy + bump_margin)) {
-    player_x = player_x + 0.5 * player_vx;
-    player_y = player_y + player_vy + bump_margin;
-  } else if (checkPath(player_x + player_vx + bump_margin, player_y + 0.5 * player_vy)) {
-    player_x = player_x + player_vx + bump_margin;
-    player_y = player_y + 0.5 * player_vy;
-  } else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy - bump_margin)) {
-    player_x = player_x + 0.5 * player_vx;
-    player_y = player_y + player_vy - bump_margin;
-  } else if (checkPath(player_x + player_vx - bump_margin, player_y + 0.5 * player_vy)) {
-    player_x = player_x + player_vx - bump_margin;
-    player_y = player_y + 0.5 * player_vy;
+
+  if (checkPath(player_x + player_vx, player_y + player_vy)) {
+    player_x += player_vx;
+    player_y += player_vy;
+  } else {
+    point p = math_utils.rotateVector(player_vx, player_vy, velocity_tolerance);
+    if (checkPath(player_x + p.x, player_y + p.y)) {
+      player_x += p.x;
+      player_y += p.y;
+      printf("CounterClock success\n");
+      printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
+      printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
+      p = math_utils.rotateVector(player_vx, player_vy, 0.2 * velocity_tolerance);
+      player_vx = restitution * p.x;
+      player_vy = restitution * p.y;
+    } else {
+      p = math_utils.rotateVector(player_vx, player_vy, -velocity_tolerance);
+      if (checkPath(player_x + p.x, player_y + p.y)) {
+        player_x += p.x;
+        player_y += p.y;
+        printf("Clock success\n");
+        printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
+        printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
+        p = math_utils.rotateVector(player_vx, player_vy, -0.2 * velocity_tolerance);
+        player_vx = restitution * p.x;
+        player_vy = restitution * p.y;
+      }
+    }
   }
+  
+
+  // else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy + bump_margin)) {
+  //   player_x = player_x + 0.5 * player_vx;
+  //   player_y = player_y + player_vy + bump_margin;
+  // } else if (checkPath(player_x + player_vx + bump_margin, player_y + 0.5 * player_vy)) {
+  //   player_x = player_x + player_vx + bump_margin;
+  //   player_y = player_y + 0.5 * player_vy;
+  // } else if (checkPath(player_x + 0.5 * player_vx, player_y + player_vy - bump_margin)) {
+  //   player_x = player_x + 0.5 * player_vx;
+  //   player_y = player_y + player_vy - bump_margin;
+  // } else if (checkPath(player_x + player_vx - bump_margin, player_y + 0.5 * player_vy)) {
+  //   player_x = player_x + player_vx - bump_margin;
+  //   player_y = player_y + 0.5 * player_vy;
+  // }
   
   player_vx *= player_velocity_decay;
   player_vy *= player_velocity_decay;
-  if (player_vx >= 0) {
-    player_direction = 1;
-  } else {
-    player_direction = -1;
+  if (abs(player_vx) > 0.1) {
+    if (player_vx >= 0) {
+      player_direction = 1;
+    } else {
+      player_direction = -1;
+    }
   }
 
   float tv = math_utils.distance(0, 0, player_vx, player_vy);

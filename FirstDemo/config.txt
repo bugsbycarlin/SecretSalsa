@@ -16,7 +16,7 @@
 </section>
 
 <section name="animation">
-  <param type="float" name="running_animation_speed">2.0</param>
+  <param type="float" name="running_animation_speed">1.4</param>
 </section>
 
 
