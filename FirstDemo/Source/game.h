@@ -56,7 +56,7 @@ class Game : public Screen {
   const float player_ay = 0.65;
   const float player_velocity_decay = 0.9;
 
-  const int velocity_tolerance = 30;
+  const float velocity_tolerance = 45;
   const float restitution = 0.85;
 
   float running_animation_speed;

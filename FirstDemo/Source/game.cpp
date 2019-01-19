@@ -112,29 +112,50 @@ void Game::logic() {
     player_x += player_vx;
     player_y += player_vy;
   } else {
-    point p = math_utils.rotateVector(player_vx, player_vy, velocity_tolerance);
-    if (checkPath(player_x + p.x, player_y + p.y)) {
-      player_x += p.x;
-      player_y += p.y;
-      printf("CounterClock success\n");
-      printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
-      printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
-      p = math_utils.rotateVector(player_vx, player_vy, 0.2 * velocity_tolerance);
-      player_vx = restitution * p.x;
-      player_vy = restitution * p.y;
-    } else {
-      p = math_utils.rotateVector(player_vx, player_vy, -velocity_tolerance);
-      if (checkPath(player_x + p.x, player_y + p.y)) {
+    bool done = false;
+    vector<float> angles = {
+      velocity_tolerance / 10.0f,
+      -velocity_tolerance / 10.0f,
+      velocity_tolerance / 3.0f,
+      -velocity_tolerance / 3.0f,
+      velocity_tolerance / 1.5f,
+      -velocity_tolerance / 1.5f,
+      velocity_tolerance,
+      -velocity_tolerance
+    };
+    for (float angle : angles) {
+      point p = math_utils.rotateVector(player_vx, player_vy, angle);
+      if (!done && checkPath(player_x + p.x, player_y + p.y)) {
         player_x += p.x;
         player_y += p.y;
-        printf("Clock success\n");
-        printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
-        printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
-        p = math_utils.rotateVector(player_vx, player_vy, -0.2 * velocity_tolerance);
         player_vx = restitution * p.x;
         player_vy = restitution * p.y;
+        done = true;
       }
     }
+    // point p = math_utils.rotateVector(player_vx, player_vy, velocity_tolerance);
+    // if (checkPath(player_x + p.x, player_y + p.y)) {
+    //   player_x += p.x;
+    //   player_y += p.y;
+    //   printf("CounterClock success\n");
+    //   printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
+    //   printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
+    //   p = math_utils.rotateVector(player_vx, player_vy, 0.2 * velocity_tolerance);
+    //   player_vx = restitution * p.x;
+    //   player_vy = restitution * p.y;
+    // } else {
+    //   p = math_utils.rotateVector(player_vx, player_vy, -velocity_tolerance);
+    //   if (checkPath(player_x + p.x, player_y + p.y)) {
+    //     player_x += p.x;
+    //     player_y += p.y;
+    //     printf("Clock success\n");
+    //     printf("V orig: %0.3f, %0.3f\n", player_vx, player_vy);
+    //     printf("V rota: %0.3f, %0.3f\n", p.x, p.y);
+    //     p = math_utils.rotateVector(player_vx, player_vy, -0.2 * velocity_tolerance);
+    //     player_vx = restitution * p.x;
+    //     player_vy = restitution * p.y;
+    //   }
+    // }
   }
   
 
