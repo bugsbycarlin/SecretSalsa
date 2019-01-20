@@ -7,14 +7,18 @@
 #pragma once
 
 #include <array>
-#include <fstream>
+#include <stack>
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-
 #include "honey.h"
+
+#include "mode.h"
+#include "walkin.h"
+#include "talkin.h"
+#include "battlin.h"
+#include "map.h"
+#include "state.h"
 
 using namespace Honey;
 using namespace std;
@@ -26,23 +30,23 @@ class Game : public Screen {
   void loop();
 
   void initialize();
-  void loadPath();
 
   void logic();
-  bool checkPath(int x, int y);
 
   void render();
 
   ~Game();
 
+  State* state;
+
+  Map* map;
+
+  stack<Mode*> modes;
+
   std::string screen_color;
 
   int screen_width;
   int screen_height;
-
-  string map_name;
-  int map_width;
-  int map_height;
 
   int player_direction;
   int player_x;
@@ -62,18 +66,11 @@ class Game : public Screen {
   float running_animation_speed;
   int frame;
 
+  int num_checked;
+
   int camera_x;
   int camera_y;
   int camera_target_x;
   int camera_target_y;
   const float camera_blend_factor = 0.2;
-
-  struct map_circle {
-    int x;
-    int y;
-    int r;
-  };
-
-  vector<map_circle> path;
-  std::array<std::array<vector<map_circle>, 8>, 8> extra_path;
 };

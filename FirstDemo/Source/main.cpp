@@ -1,5 +1,5 @@
 /*
-  Secret Salsa First Demo
+  Secret Salsa
   Matthew Carlin
   Copyright 2019
 */
