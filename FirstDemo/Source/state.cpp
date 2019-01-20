@@ -10,7 +10,10 @@ using namespace Honey;
 using namespace std;
 
 State::State() {
+  modes = {};
 }
 
 State::~State() {
+  // To do: delete the stack of modes
+  delete map;
 }

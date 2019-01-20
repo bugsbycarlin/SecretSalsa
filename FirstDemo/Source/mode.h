@@ -13,6 +13,9 @@
 
 #include "honey.h"
 
+#include "state.h"
+#include "map.h"
+
 using namespace Honey;
 using namespace std;
 
@@ -25,4 +28,6 @@ class Mode {
   virtual void render();
 
   virtual ~Mode();
+
+  State* state;
 };

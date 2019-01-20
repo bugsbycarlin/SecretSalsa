@@ -5,14 +5,17 @@
   <param type="string" name="map_name">running_track</param>
   <param type="string" name="screen_color">#555555</param>
 
-  <param type="int" name="font_x">30</param>
-  <param type="int" name="font_y">30</param>
+  <param type="int" name="hp_x">30</param>
+  <param type="int" name="hp_y">20</param>
 
   <param type="int" name="player_starting_x">325</param>
   <param type="int" name="player_starting_y">350</param>
 
   <param type="int" name="player_margin_x">0</param>
   <param type="int" name="player_margin_y">-50</param>
+
+  <param type="int" name="player_battlin_x">800</param>
+  <param type="int" name="player_battlin_y">450</param>
 </section>
 
 <section name="animation">

@@ -9,7 +9,7 @@
 using namespace std;
 using namespace Honey;
 
-Talkin::Talkin() {
+Talkin::Talkin(State* state) {
 }
 
 void Talkin::initialize() {

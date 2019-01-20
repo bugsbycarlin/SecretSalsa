@@ -16,7 +16,7 @@ using namespace std;
 
 class Talkin : public Mode {
  public:
-  Talkin();
+  Talkin(State* state);
 
   void initialize();
   void logic();
