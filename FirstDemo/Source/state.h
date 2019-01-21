@@ -9,6 +9,7 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <stack>
 #include <string>
 #include <vector>
@@ -25,6 +26,9 @@ class Mode;
 class State {
  public:
   State();
+
+  void store(string label, int value);
+  int get(string label);
 
   ~State();
 
@@ -43,4 +47,6 @@ class State {
   const float camera_blend_factor = 0.2;
 
   int player_hp;
+
+  std::map<string, int> values;
 };

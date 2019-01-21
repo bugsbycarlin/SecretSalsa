@@ -22,5 +22,7 @@ class Drawable {
 
   virtual void draw(int x, int y);
 
+  virtual void overlayer(int x, int y);
+
   virtual ~Drawable();
 };

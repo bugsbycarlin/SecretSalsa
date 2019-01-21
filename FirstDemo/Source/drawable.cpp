@@ -15,5 +15,8 @@ Drawable::Drawable() {
 void Drawable::draw(int x, int y) {
 }
 
+void Drawable::overlayer(int x, int y) {
+}
+
 Drawable::~Drawable() {
 }

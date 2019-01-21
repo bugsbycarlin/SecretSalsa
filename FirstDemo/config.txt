@@ -8,8 +8,11 @@
   <param type="int" name="hp_x">30</param>
   <param type="int" name="hp_y">20</param>
 
-  <param type="int" name="player_starting_x">325</param>
-  <param type="int" name="player_starting_y">350</param>
+  <param type="int" name="laps_x">30</param>
+  <param type="int" name="laps_y">50</param>
+
+  <param type="int" name="player_starting_x">1328</param>
+  <param type="int" name="player_starting_y">793</param>
 
   <param type="int" name="player_margin_x">0</param>
   <param type="int" name="player_margin_y">-50</param>

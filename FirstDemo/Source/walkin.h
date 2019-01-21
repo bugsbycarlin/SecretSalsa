@@ -23,6 +23,13 @@ class Walkin : public Mode {
   void logic();
   void render();
 
+  void movementLogic();
+  void animationLogic();
+  void cameraLogic();
+  void gameLogic();
+
+  bool checkBox(int x, int y, box b);
+
   ~Walkin();
 
   int player_direction;
@@ -44,4 +51,8 @@ class Walkin : public Mode {
   int frame;
 
   Textbox* hp_box;
+  Textbox* laps_box;
+
+  vector<box> lap_zones;
+  int lap_zone_counter;
 };

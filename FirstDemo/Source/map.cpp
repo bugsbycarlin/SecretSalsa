@@ -16,6 +16,12 @@ Map::Map(string map_name) {
     }
   }
 
+  graphics.addImages("Art/", {
+    "rain_streak",
+    "rain_splash",
+    "white_tile",
+  });
+
   graphics.addImages("Maps/", {
     map_name,
   });
@@ -23,6 +29,10 @@ Map::Map(string map_name) {
 
   map_width = graphics.getWidth(map_name);
   map_height = graphics.getHeight(map_name);
+
+  raining = false;
+
+  initializeRainLayer();
 
   loadPath();
 }
@@ -51,6 +61,47 @@ void Map::loadPath() {
   }
 }
 
+void Map::initializeRainLayer() {
+  Uint32 rmask, gmask, bmask, amask;
+  rmask = 0x00ff0000;
+  gmask = 0x0000ff00;
+  bmask = 0x000000ff;
+  amask = 0xff000000;
+
+  int width = hot_config.getInt("layout", "screen_width");
+  int height = hot_config.getInt("layout", "screen_height");
+  SDL_Surface* rain_surface = SDL_CreateRGBSurface(0, width, height, 32, rmask, gmask, bmask, amask);
+
+  SDL_LockSurface(rain_surface);
+  unsigned int *rain_surface_ptr = (unsigned int*)rain_surface->pixels;
+
+  for (int k = 0; k < width; k++) {
+    for (int l = 0; l < height; l++) {
+      rain_surface_ptr[l * rain_surface->w + k] = 0x44444455;
+    }
+  }
+
+  SDL_UnlockSurface(rain_surface);
+  graphics.addImageFromSurface("rain_layer", rain_surface);
+}
+
+void Map::startRain() {
+  raining = true;
+  rain_field = {};
+  rain_targets = {};
+  splash_field = {};
+  rain_velocity = math_utils.rotateVector(0, 1, -rain_angle);
+  timing.mark("raining");
+}
+
+void Map::stopRain() {
+  raining = false;
+  rain_field = {};
+  rain_targets = {};
+  splash_field = {};
+  timing.remove("raining");
+}
+
 bool Map::checkPath(int x, int y) {
   for (map_circle circle : path) {
     if (math_utils.distance(x, y, circle.x, circle.y) <= circle.r) {
@@ -67,8 +118,89 @@ bool Map::checkPath(int x, int y) {
   return false;
 }
 
+void Map::logic() {
+  if (raining) {
+    // This makes the rain a lot worse
+    // if (timing.since("raining") > 4.0 && rain_angle < 70) {
+    //   rain_angle++;
+    //   rain_velocity = math_utils.rotateVector(0, 1, -rain_angle);
+    // }
+    // if (timing.since("raining") > 6.0 && rain_density < 900) {
+    //     rain_density++;
+    // }
+
+    if (rain_field.size() < rain_density) {
+      int target_x = math_utils.randomInt(0, map_width);
+      int target_y = math_utils.randomInt(0, map_height);
+      int distance = math_utils.randomInt(800,1000);
+      int start_x = target_x + (int) (distance * rain_velocity.x);
+      int start_y = target_y - (int) (distance * rain_velocity.y);
+      rain_targets.push_back({target_x, target_y});
+      rain_field.push_back({start_x, start_y});
+    }
+
+    for (int i = 0; i < rain_field.size(); i++) {
+      rain_field[i].x -= 15 * rain_velocity.x;
+      rain_field[i].y += 15 * rain_velocity.y;
+
+      if (rain_field[i].y > rain_targets[i].y) {
+        int target_x = math_utils.randomInt(0, map_width);
+        int target_y = math_utils.randomInt(0, map_height);
+        int distance = math_utils.randomInt(800,1000);
+        int start_x = target_x + (int) (distance * rain_velocity.x);
+        int start_y = target_y - (int) (distance * rain_velocity.y);
+        rain_field[i].x = start_x;
+        rain_field[i].y = start_y;
+        rain_targets[i].x = target_x;
+        rain_targets[i].y = target_y;
+      }
+    }
+
+    if (splash_field.size() < rain_density / 15.0) {
+      float target_x = math_utils.randomInt(0, map_width);
+      float target_y = math_utils.randomInt(0, map_height);
+      splash_field.push_back({target_x, target_y, 0.1});
+    }
+
+    for (int i = 0; i < splash_field.size(); i++) {
+      splash_field[i].z += 0.05;
+      if (splash_field[i].z > 3.0) {
+        splash_field[i].x = math_utils.randomInt(0, map_width);
+        splash_field[i].y = math_utils.randomInt(0, map_height);
+        splash_field[i].z = 0.1;
+      }
+    }
+  }
+}
+
 void Map::draw(int x, int y) {
   graphics.drawImage(map_name, x, y);
+
+  if (raining && timing.since("raining") > 4.0) {
+    graphics.drawImage("rain_layer", 0, 0);
+  } else if (raining && timing.since("raining") >= 2.0) {
+    graphics.setColor("#FFFFFF", (timing.since("raining") / 2.0) - 1.0);
+    graphics.drawImage("rain_layer", 0, 0);
+    graphics.setColor("#FFFFFF", 1.0);
+  }
+
+  for (point p : splash_field) {
+    graphics.setColor("#FFFFFF", 1.0 - p.z / 3.0);
+    graphics.drawImage("rain_splash", p.x + x, p.y + y, true, 0, rain_scale * p.z);
+    graphics.setColor("#FFFFFF", 1.0);
+  }
+}
+
+void Map::overlayer(int x, int y) {
+  for (position p : rain_field) {
+    graphics.drawImage("rain_streak", p.x + x, p.y + y, true, rain_angle, rain_scale);
+  }
+
+  if (raining) {
+    graphics.setColor("#FFFFFF", 1.0 / (4.0 * timing.since("raining")));
+    graphics.drawImage("white_tile", map_width / 2.0, map_height / 2.0, true, 0, map_width / 64.0);
+    graphics.setColor("#FFFFFF", 1.0);
+  }
 }
 
 Map::~Map() {

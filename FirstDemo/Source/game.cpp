@@ -15,6 +15,7 @@ Game::Game() {
 
 void Game::loop() {
   logic();
+  state->map->logic();
   state->modes.top()->logic();
 
   render();
@@ -29,6 +30,7 @@ void Game::initialize() {
   state->map = new Map(hot_config.getString("layout", "map_name"));
 
   state->player_hp = 1000;
+  state->store("laps", 0);
 
   graphics.addImages("Art/", {
     "Character_Test_Frame_1",

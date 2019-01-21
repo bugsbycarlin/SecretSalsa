@@ -52,6 +52,8 @@ void Battlin::render() {
     1
   );
 
+  state->map->overlayer(-state->camera_x, -state->camera_y);
+
   hp_box->draw();
 }
 
