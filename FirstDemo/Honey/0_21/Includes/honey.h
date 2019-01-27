@@ -74,6 +74,7 @@
 #include "layouts.h"
 #include "sprite.h"
 #include "textbox.h"
+#include "menu.h"
 #include "sound.h"
 
 using namespace std;

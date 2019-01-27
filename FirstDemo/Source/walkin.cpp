@@ -22,6 +22,9 @@ void Walkin::initialize() {
   player_vx = 0;
   player_vy = 0;
 
+  coach_bulldog_x = hot_config.getInt("layout", "coach_bulldog_x");
+  coach_bulldog_y = hot_config.getInt("layout", "coach_bulldog_y");
+
   state->camera_x = player_x - (state->screen_width / 2.0);
   state->camera_y = player_y - (state->screen_height / 1.5);
 
@@ -40,6 +43,64 @@ void Walkin::initialize() {
     (position) {hot_config.getInt("layout", "laps_x"), hot_config.getInt("layout", "laps_y")},
     "#000000"
   );
+
+  character_menu = new Menu(
+    hot_config.getInt("menu", "character_x"),
+    hot_config.getInt("menu", "character_y"),
+    hot_config.getInt("menu", "character_width"),
+    hot_config.getInt("menu", "character_height"),
+    "Art/",
+    hot_config.getString("menu", "character_image_root"),
+    hot_config.getInt("menu", "character_margin_x"),
+    hot_config.getInt("menu", "character_margin_y"),
+    hot_config.getInt("menu", "character_num_lines"),
+    hot_config.getInt("menu", "character_wrap_length"),
+    hot_config.getBool("menu", "character_typewriter"),
+    hot_config.getFloat("menu", "character_typewriter_delay"),
+    hot_config.getString("menu", "character_font_path"),
+    hot_config.getInt("menu", "character_font_size"),
+    hot_config.getString("menu", "character_font_color")
+  );
+
+  conversation_menu = new Menu(
+    hot_config.getInt("menu", "conversation_x"),
+    hot_config.getInt("menu", "conversation_y"),
+    hot_config.getInt("menu", "conversation_width"),
+    hot_config.getInt("menu", "conversation_height"),
+    "Art/",
+    hot_config.getString("menu", "conversation_image_root"),
+    hot_config.getInt("menu", "conversation_margin_x"),
+    hot_config.getInt("menu", "conversation_margin_y"),
+    hot_config.getInt("menu", "conversation_num_lines"),
+    hot_config.getInt("menu", "conversation_wrap_length"),
+    hot_config.getBool("menu", "conversation_typewriter"),
+    hot_config.getFloat("menu", "conversation_typewriter_delay"),
+    hot_config.getString("menu", "conversation_font_path"),
+    hot_config.getInt("menu", "conversation_font_size"),
+    hot_config.getString("menu", "conversation_font_color")
+  );
+
+  // conversation_menu->setText({
+  //   "TUNE BEAR 1000",
+  //   "MAIN BEAR 1324",
+  //   "ROBIN      897"
+  // });
+
+  conversation_menu->setTextLines({
+    "AROUND THIS TRACK, UNTIL MY BOYS",
+    "BRING YOU DOWN. IF YOU DO 10",
+    "LAPS, YOU'RE IN THE PACK."
+  });
+
+  // conversation_menu->setTextLines({
+  //   "Around this track, until my boys",
+  //   "bring you down. If you do 10",
+  //   "laps, you're in the pack."
+  // });
+
+  character_menu->setTextLines({
+    "COACH BULLDOG",
+  });
 
   lap_zone_counter = 0;
   lap_zones = {
@@ -187,18 +248,32 @@ void Walkin::render() {
     player_image,
     player_x - state->camera_x + player_margin_x,
     player_y - state->camera_y + player_margin_y,
-    true,
-    0,
-    1
+    true, 0, 1
+  );
+
+  graphics.drawImage(
+    "coach_bulldog",
+    coach_bulldog_x - state->camera_x,
+    coach_bulldog_y - state->camera_y,
+    true, 0, 1
   );
 
   state->map->overlayer(-state->camera_x, -state->camera_y);
 
   hp_box->draw();
   laps_box->draw();
+
+  character_menu->draw();
+  conversation_menu->draw();
+  graphics.drawImage(
+    "coach_bulldog_profile",
+    hot_config.getInt("menu", "profile_x"),
+    hot_config.getInt("menu", "profile_y")
+  );
 }
 
 Walkin::~Walkin() {
   delete hp_box;
   delete laps_box;
+  delete conversation_menu;
 }

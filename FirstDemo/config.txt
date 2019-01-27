@@ -14,11 +14,49 @@
   <param type="int" name="player_starting_x">1328</param>
   <param type="int" name="player_starting_y">793</param>
 
+  <param type="int" name="coach_bulldog_x">680</param>
+  <param type="int" name="coach_bulldog_y">520</param>
+
   <param type="int" name="player_margin_x">0</param>
   <param type="int" name="player_margin_y">-50</param>
 
   <param type="int" name="player_battlin_x">800</param>
   <param type="int" name="player_battlin_y">450</param>
+</section>
+
+<section name="menu">
+  <param type="int" name="character_x">20</param>
+  <param type="int" name="character_y">570</param>
+  <param type="int" name="character_width">200</param>
+  <param type="int" name="character_height">29</param>
+  <param type="string" name="character_image_root">gradient_menu</param>
+  <param type="int" name="character_margin_x">20</param>
+  <param type="int" name="character_margin_y">1</param>
+  <param type="int" name="character_num_lines">3</param>
+  <param type="int" name="character_wrap_length">60</param>
+  <param type="bool" name="character_typewriter">false</param>
+  <param type="float" name="character_typewriter_delay">0.05</param>
+  <param type="string" name="character_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="character_font_size">20</param>
+  <param type="string" name="character_font_color">#f0f8ff</param>
+
+  <param type="int" name="conversation_x">20</param>
+  <param type="int" name="conversation_y">597</param>
+  <param type="int" name="conversation_width">600</param>
+  <param type="int" name="conversation_height">110</param>
+  <param type="string" name="conversation_image_root">gradient_menu</param>
+  <param type="int" name="conversation_margin_x">20</param>
+  <param type="int" name="conversation_margin_y">10</param>
+  <param type="int" name="conversation_num_lines">3</param>
+  <param type="int" name="conversation_wrap_length">60</param>
+  <param type="bool" name="conversation_typewriter">false</param>
+  <param type="float" name="conversation_typewriter_delay">0.05</param>
+  <param type="string" name="conversation_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="conversation_font_size">25</param>
+  <param type="string" name="conversation_font_color">#f0f8ff</param>
+
+  <param type="int" name="profile_x">640</param>
+  <param type="int" name="profile_y">570</param>
 </section>
 
 <section name="animation">

@@ -22,4 +22,4 @@ def cleanObjects(target, source, env):
 
 cleanup = Command("cleanObjects", [], cleanObjects)
 Depends(cleanup, BUILD_TARGETS)
-BUILD_TARGETS.append("cleanObjects")
+#BUILD_TARGETS.append("cleanObjects")

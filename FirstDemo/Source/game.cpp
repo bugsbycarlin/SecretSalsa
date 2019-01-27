@@ -39,6 +39,8 @@ void Game::initialize() {
     "Character_Test_Frame_1_flip",
     "Character_Test_Frame_2_flip",
     "Character_Test_Frame_3_flip",
+    "coach_bulldog",
+    "coach_bulldog_profile",
   });
 
   state->modes.push(new Walkin(state));

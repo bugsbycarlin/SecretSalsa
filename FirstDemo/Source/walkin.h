@@ -32,6 +32,9 @@ class Walkin : public Mode {
 
   ~Walkin();
 
+  int coach_bulldog_x;
+  int coach_bulldog_y;
+
   int player_direction;
   int player_x;
   int player_y;
@@ -52,6 +55,9 @@ class Walkin : public Mode {
 
   Textbox* hp_box;
   Textbox* laps_box;
+
+  Menu* character_menu;
+  Menu* conversation_menu;
 
   vector<box> lap_zones;
   int lap_zone_counter;
