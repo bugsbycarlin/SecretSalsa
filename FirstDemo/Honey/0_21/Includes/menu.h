@@ -17,6 +17,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 // Honey includes
 #include "textbox.h"
@@ -132,8 +134,10 @@ namespace Honey {
     static int unique_count;
 
    private:
+    void makeTextboxes();
+
     vector<Textbox*> textboxes;
-    vector<string> textlines;
+    vector<string> text_lines;
 
     int x;
     int y;
@@ -146,6 +150,10 @@ namespace Honey {
     int wrap_length;
     bool typewriter;
     float typewriter_delay;
+
+
+    int text_length;
+    int typewriter_position; 
 
   };
 }

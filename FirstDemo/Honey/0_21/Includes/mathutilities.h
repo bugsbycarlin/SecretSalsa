@@ -81,9 +81,6 @@ namespace Honey {
     */
     position closestPoint(position p1, position p2, position p3);
 
-
-
-
    private:
     // Hide constructor, destructor, copy constructor and assignment operator
     MathUtilities();

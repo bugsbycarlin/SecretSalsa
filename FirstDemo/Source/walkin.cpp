@@ -86,11 +86,16 @@ void Walkin::initialize() {
   //   "ROBIN      897"
   // });
 
-  conversation_menu->setTextLines({
-    "AROUND THIS TRACK, UNTIL MY BOYS",
-    "BRING YOU DOWN. IF YOU DO 10",
-    "LAPS, YOU'RE IN THE PACK."
-  });
+  // conversation_menu->setTextLines({
+  //   "AROUND THIS TRACK, UNTIL MY BOYS",
+  //   "BRING YOU DOWN. IF YOU DO 10",
+  //   "LAPS, YOU'RE IN THE PACK."
+  // });
+
+  conversation_menu->setText(
+    "AROUND THIS TRACK, UNTIL MY BOYS BRING YOU DOWN. IF YOU DO 10 LAPS, YOU'RE IN THE PACK."
+  );
+  conversation_menu->startTypewriter();
 
   // conversation_menu->setTextLines({
   //   "Around this track, until my boys",
@@ -226,6 +231,10 @@ void Walkin::gameLogic() {
       state->store("laps", state->get("laps") + 1);
       printf("Lap.\n");
     }
+  }
+
+  if (input.keyPressed("c") > 0) {
+    conversation_menu->startTypewriter();
   }
 }
 
