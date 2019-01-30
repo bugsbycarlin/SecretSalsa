@@ -56,8 +56,8 @@ class Walkin : public Mode {
   Textbox* hp_box;
   Textbox* laps_box;
 
-  Menu* character_menu;
-  Menu* conversation_menu;
+  // Menu* character_menu;
+  // Menu* conversation_menu;
 
   vector<box> lap_zones;
   int lap_zone_counter;

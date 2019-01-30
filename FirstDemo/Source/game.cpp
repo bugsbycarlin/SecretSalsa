@@ -41,9 +41,12 @@ void Game::initialize() {
     "Character_Test_Frame_3_flip",
     "coach_bulldog",
     "coach_bulldog_profile",
+    "tune_bear",
+    "tune_bear_profile",
+    "choice_arrow"
   });
 
-  state->modes.push(new Walkin(state));
+  state->modes.push(new Talkin(state));
   state->modes.top()->initialize();
 }
 

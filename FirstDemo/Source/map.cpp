@@ -38,7 +38,7 @@ Map::Map(string map_name) {
 }
 
 void Map::loadPath() {
-  std::ifstream input_file("Scripts/" + map_name + "_path.txt");
+  std::ifstream input_file("Maps/" + map_name + "_path.txt");
 
   string line;
   int count = 0;

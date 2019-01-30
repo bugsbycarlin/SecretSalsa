@@ -17,11 +17,17 @@
   <param type="int" name="coach_bulldog_x">680</param>
   <param type="int" name="coach_bulldog_y">520</param>
 
+  <param type="int" name="tune_bear_x">980</param>
+  <param type="int" name="tune_bear_y">520</param>
+
   <param type="int" name="player_margin_x">0</param>
   <param type="int" name="player_margin_y">-50</param>
 
   <param type="int" name="player_battlin_x">800</param>
   <param type="int" name="player_battlin_y">450</param>
+
+  <param type="int" name="conversation_camera_x">60</param>
+  <param type="int" name="conversation_camera_y">40</param>
 </section>
 
 <section name="menu">
@@ -55,8 +61,26 @@
   <param type="int" name="conversation_font_size">25</param>
   <param type="string" name="conversation_font_color">#f0f8ff</param>
 
+  <param type="int" name="choice_x">20</param>
+  <param type="int" name="choice_y">30</param>
+  <param type="int" name="choice_width">1000</param>
+  <param type="int" name="choice_height">160</param>
+  <param type="string" name="choice_image_root">gradient_menu</param>
+  <param type="int" name="choice_margin_x">40</param>
+  <param type="int" name="choice_margin_y">10</param>
+  <param type="int" name="choice_num_lines">5</param>
+  <param type="int" name="choice_wrap_length">60</param>
+  <param type="bool" name="choice_typewriter">false</param>
+  <param type="float" name="choice_typewriter_delay">0.03</param>
+  <param type="string" name="choice_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="choice_font_size">25</param>
+  <param type="string" name="choice_font_color">#f0f8ff</param>
+
   <param type="int" name="profile_x">680</param>
   <param type="int" name="profile_y">570</param>
+
+  <param type="int" name="alt_profile_x">20</param>
+  <param type="int" name="alt_profile_y">420</param>
 </section>
 
 <section name="animation">
