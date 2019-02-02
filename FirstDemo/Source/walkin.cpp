@@ -44,51 +44,6 @@ void Walkin::initialize() {
     "#000000"
   );
 
-  // character_menu = new Menu(
-  //   hot_config.getInt("menu", "character_x"),
-  //   hot_config.getInt("menu", "character_y"),
-  //   hot_config.getInt("menu", "character_width"),
-  //   hot_config.getInt("menu", "character_height"),
-  //   "Art/",
-  //   hot_config.getString("menu", "character_image_root"),
-  //   hot_config.getInt("menu", "character_margin_x"),
-  //   hot_config.getInt("menu", "character_margin_y"),
-  //   hot_config.getInt("menu", "character_num_lines"),
-  //   hot_config.getInt("menu", "character_wrap_length"),
-  //   hot_config.getBool("menu", "character_typewriter"),
-  //   hot_config.getFloat("menu", "character_typewriter_delay"),
-  //   hot_config.getString("menu", "character_font_path"),
-  //   hot_config.getInt("menu", "character_font_size"),
-  //   hot_config.getString("menu", "character_font_color")
-  // );
-
-  // conversation_menu = new Menu(
-  //   hot_config.getInt("menu", "conversation_x"),
-  //   hot_config.getInt("menu", "conversation_y"),
-  //   hot_config.getInt("menu", "conversation_width"),
-  //   hot_config.getInt("menu", "conversation_height"),
-  //   "Art/",
-  //   hot_config.getString("menu", "conversation_image_root"),
-  //   hot_config.getInt("menu", "conversation_margin_x"),
-  //   hot_config.getInt("menu", "conversation_margin_y"),
-  //   hot_config.getInt("menu", "conversation_num_lines"),
-  //   hot_config.getInt("menu", "conversation_wrap_length"),
-  //   hot_config.getBool("menu", "conversation_typewriter"),
-  //   hot_config.getFloat("menu", "conversation_typewriter_delay"),
-  //   hot_config.getString("menu", "conversation_font_path"),
-  //   hot_config.getInt("menu", "conversation_font_size"),
-  //   hot_config.getString("menu", "conversation_font_color")
-  // );
-
-  // conversation_menu->setText(
-  //   "AROUND THIS TRACK, UNTIL MY BOYS BRING YOU DOWN. IF YOU DO 10 LAPS, YOU'RE IN THE PACK."
-  // );
-  // conversation_menu->startTypewriter();
-
-  // character_menu->setTextLines({
-  //   "COACH BULLDOG",
-  // });
-
   lap_zone_counter = 0;
   lap_zones = {
     {.top =  579, .left = 1520, .bottom = 622, .right = 1731},

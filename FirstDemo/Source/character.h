@@ -18,7 +18,11 @@ class Character : public Drawable {
  public:
   Character();
 
-  void draw(int x, int y);
+  void simpleBounceWalk();
+
+  virtual void walkBehavior();
+
+  virtual void draw(int x, int y);
 
   ~Character();
 };

@@ -46,7 +46,8 @@ void Game::initialize() {
     "choice_arrow"
   });
 
-  state->modes.push(new Talkin(state));
+  //state->modes.push(new Talkin(state));
+  state->modes.push(new Walkin(state));
   state->modes.top()->initialize();
 }
 
