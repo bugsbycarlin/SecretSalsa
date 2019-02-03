@@ -10,12 +10,19 @@
 
 #include "honey.h"
 #include "mode.h"
+#include "character.h"
 
 using namespace Honey;
 using namespace std;
 
 class Battlin : public Mode {
  public:
+  struct Placement {
+    Character* character;
+    int i;
+    int j;
+  };
+
   Battlin(State* state);
 
   void initialize();
@@ -25,4 +32,7 @@ class Battlin : public Mode {
   ~Battlin();
 
   Textbox* hp_box;
+
+  vector<Placement> left_placements;
+  vector<Placement> right_placements;
 };

@@ -33,15 +33,16 @@ void Game::initialize() {
   state->store("laps", 0);
 
   graphics.addImages("Art/", {
-    "Character_Test_Frame_1",
-    "Character_Test_Frame_2",
-    "Character_Test_Frame_3",
-    "Character_Test_Frame_1_flip",
-    "Character_Test_Frame_2_flip",
-    "Character_Test_Frame_3_flip",
+    "baddie_static",
+    "baddie_walk_1",
+    "baddie_walk_2",
+    "baddie_ko",
     "coach_bulldog",
     "coach_bulldog_profile",
     "tune_bear",
+    "robin",
+    "robin_flapping",
+    "witchycat",
     "tune_bear_profile",
     "choice_arrow"
   });

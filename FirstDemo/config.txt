@@ -28,6 +28,32 @@
 
   <param type="int" name="conversation_camera_x">60</param>
   <param type="int" name="conversation_camera_y">40</param>
+
+  <param type="int" name="baddie_starting_x">41</param>
+  <param type="int" name="baddie_starting_y">852</param>
+
+  <param type="int" name="battle_left_layout_x">300</param>
+  <param type="int" name="battle_left_layout_y">160</param>
+  <param type="int" name="battle_left_layout_x_margin">120</param>
+  <param type="int" name="battle_left_layout_y_margin">110</param>
+
+  <param type="int" name="battle_right_layout_x">860</param>
+  <param type="int" name="battle_right_layout_y">160</param>
+  <param type="int" name="battle_right_layout_x_margin">120</param>
+  <param type="int" name="battle_right_layout_y_margin">110</param>
+
+  <param type="int" name="battle_layout_tilt">30</param>
+</section>
+
+<section name="game">
+  <param type="int" name="tune_bear_hp">127</param>
+  <param type="int" name="witchycat_hp">109</param>
+  <param type="int" name="robin_hp">83</param>
+
+  <param type="int" name="baddie_min_hp">90</param>
+  <param type="int" name="baddie_max_hp">120</param>
+
+  <param type="int" name="battle_trigger_distance">40</param>  
 </section>
 
 <section name="menu">
@@ -76,6 +102,21 @@
   <param type="int" name="choice_font_size">25</param>
   <param type="string" name="choice_font_color">#f0f8ff</param>
 
+  <param type="int" name="lap_count_x">20</param>
+  <param type="int" name="lap_count_y">20</param>
+  <param type="int" name="lap_count_width">120</param>
+  <param type="int" name="lap_count_height">30</param>
+  <param type="string" name="lap_count_image_root">gradient_menu</param>
+  <param type="int" name="lap_count_margin_x">10</param>
+  <param type="int" name="lap_count_margin_y">2</param>
+  <param type="int" name="lap_count_num_lines">1</param>
+  <param type="int" name="lap_count_wrap_length">12</param>
+  <param type="bool" name="lap_count_typewriter">false</param>
+  <param type="float" name="lap_count_typewriter_delay">0.03</param>
+  <param type="string" name="lap_count_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="lap_count_font_size">20</param>
+  <param type="string" name="lap_count_font_color">#f0f8ff</param>
+
   <param type="int" name="profile_x">680</param>
   <param type="int" name="profile_y">570</param>
 
@@ -85,6 +126,12 @@
 
 <section name="animation">
   <param type="float" name="running_animation_speed">1.4</param>
+  <param type="int" name="walk_trailing_distance">10</param>
+  <param type="float" name="walk_bounce_speed">0.25</param>
+  <param type="int" name="walk_bounce_height">8</param>
+  <param type="int" name="walk_bounce_lean">3</param>
+  <param type="float" name="robin_flapping_animation_speed">0.05</param>
+  <param type="float" name="baddie_walking_speed">0.20</param>
 </section>
 
 

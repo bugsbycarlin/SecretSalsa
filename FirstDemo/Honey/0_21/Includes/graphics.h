@@ -246,7 +246,40 @@ namespace Honey {
       @param rotation desired clockwise rotation of the image on the screen in degrees.
       @param scale desired scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
     */
-    void drawImage(string label, int x_position, int y_position, bool centered, float rotation, float scale);
+    void drawImage(
+      string label,
+      int x_position,
+      int y_position,
+      bool centered,
+      float rotation,
+      float scale);
+
+    /*!
+      Draw an image at the given location. This version has more options; the image can be centered at x,y instead
+      of drawn from the top left corner. It can be rotated clockwise by a specified angle, and scaled by a specified
+      scale value.
+      
+      @param label the name of an image in our system. It is assumed this has already been loaded with addImage.
+      @param x_position desired x coordinate of the image on the screen.
+      @param y_position desired y coordinate of the image on the screen.
+      @param centered whether to draw the image from the center instead of the top left.
+      @param rotation desired clockwise rotation of the image on the screen in degrees.
+      @param scale desired scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
+      @param x_flip whether to flip the image on the x axis.
+      @param y_flip whether to flip the image on the y axis.
+      @param z_flip whether to flip the image on the z axis.
+    */
+    void drawImage(
+      string label,
+      int x_position,
+      int y_position,
+      bool centered,
+      float rotation,
+      float scale,
+      bool x_flip,
+      bool y_flip,
+      bool z_flip);
+
 
     /*!
       Remove the desired image from the graphics card and from this Graphics system.

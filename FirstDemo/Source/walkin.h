@@ -9,6 +9,8 @@
 #include <string>
 
 #include "honey.h"
+#include "character.h"
+#include "group.h"
 #include "mode.h"
 #include "battlin.h"
 
@@ -23,6 +25,9 @@ class Walkin : public Mode {
   void logic();
   void render();
 
+  void initializeCharacters();
+  void addBaddieGroup();
+
   void movementLogic();
   void animationLogic();
   void cameraLogic();
@@ -35,30 +40,18 @@ class Walkin : public Mode {
   int coach_bulldog_x;
   int coach_bulldog_y;
 
-  int player_direction;
-  int player_x;
-  int player_y;
-  int player_margin_x;
-  int player_margin_y;
-  float player_vx;
-  float player_vy;
-  const float player_max_velocity = 7.0;
-  const float player_ax = 0.75;
-  const float player_ay = 0.65;
-  const float player_velocity_decay = 0.9;
+  Group* party_group;
+  vector<Group*> baddie_groups;
+  vector<box*> baddie_seek_points;
+  vector<int> baddie_seek_numbers;
 
-  const float velocity_tolerance = 45;
-  const float restitution = 0.85;
-
-  float running_animation_speed;
-  int frame;
-
-  Textbox* hp_box;
-  Textbox* laps_box;
-
-  // Menu* character_menu;
-  // Menu* conversation_menu;
+  // Textbox* hp_box;
+  // Textbox* laps_box;
 
   vector<box> lap_zones;
+  vector<box> lap_seek_points;
   int lap_zone_counter;
+  Menu* lap_count_box;
+
+  int battle_trigger_distance;
 };
