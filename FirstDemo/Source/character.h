@@ -28,15 +28,23 @@ class Character {
   void walkBehavior(float ax, float ay);
   void followBehavior(int x, int y);
   void seekBehavior(int x, int y);
+  void koBehavior();
+
+  void battlePrepBehavior();
 
   void simpleBounceAnimation();
   virtual void walkAnimation();
 
   virtual void draw();
+  void battlePrepDraw();
+  void battleDraw();
 
   ~Character();
 
   State* state;
+
+  string name;
+  string display_name;
 
   map<string, vector<string>> animations;
   string current_animation;
@@ -71,8 +79,14 @@ class Character {
   int hp;
   int max_hp;
 
+  float ap;
+  const float max_ap = 100;
+  float ap_rate;
+
   int battle_x;
   int battle_y;
+  int battle_home_x;
+  int battle_home_y;
 
   string unique_name;
 

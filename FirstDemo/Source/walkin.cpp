@@ -23,6 +23,8 @@ Walkin::Walkin(State* state) {
 void Walkin::initializeCharacters() {
   Character* character = new Character(state);
 
+  character->name = "tune_bear";
+  character->display_name = "Tune Bear";
   character->max_hp = hot_config.getInt("game", "tune_bear_hp");
   character->hp = character->max_hp;character->direction = 1;
   character->x = hot_config.getInt("layout", "player_starting_x");
@@ -33,11 +35,14 @@ void Walkin::initializeCharacters() {
   character->vy = 0;
   character->addAnimation("static", {"tune_bear"});
   character->simpleBounceAnimation();
+  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
 
   party_group->add(character);
 
   character = new Character(state);
 
+  character->name = "witchycat";
+  character->display_name = "Witchycat";
   character->max_hp = hot_config.getInt("game", "witchycat_hp");
   character->hp = character->max_hp;
   character->direction = 1;
@@ -49,11 +54,33 @@ void Walkin::initializeCharacters() {
   character->vy = 0;
   character->addAnimation("static", {"witchycat"});
   character->simpleBounceAnimation();
+  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
 
   party_group->add(character);
 
   character = new Character(state);
 
+  character->name = "witchycat2";
+  character->display_name = "Witchycat 2";
+  character->max_hp = hot_config.getInt("game", "witchycat_hp");
+  character->hp = character->max_hp;
+  character->direction = 1;
+  character->x = hot_config.getInt("layout", "player_starting_x");
+  character->y = hot_config.getInt("layout", "player_starting_y");
+  character->margin_x = hot_config.getInt("layout", "player_margin_x");
+  character->margin_y = hot_config.getInt("layout", "player_margin_y");
+  character->vx = 0;
+  character->vy = 0;
+  character->addAnimation("static", {"witchycat"});
+  character->simpleBounceAnimation();
+  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
+
+  party_group->add(character);
+
+  character = new Character(state);
+
+  character->name = "robin";
+  character->display_name = "Robin";
   character->max_hp = hot_config.getInt("game", "robin_hp");
   character->hp = character->max_hp;
   character->direction = 1;
@@ -68,6 +95,7 @@ void Walkin::initializeCharacters() {
   character->simpleBounceAnimation();
   character->walk_animation_speed = hot_config.getFloat("animation", "robin_flapping_animation_speed");
   printf("Robin animation speed: %0.2f\n", character->walk_animation_speed);
+  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
 
   party_group->add(character);
 }
@@ -89,6 +117,9 @@ void Walkin::addBaddieGroup() {
 
   for (int i = 0; i < num_baddies; i++) {
     Character* baddie = new Character(state);
+
+    baddie->name = "big_dog";
+    baddie->display_name = "Big Dog";
     baddie->max_hp = math_utils.randomInt(
       hot_config.getInt("game", "baddie_min_hp"),
       hot_config.getInt("game", "baddie_max_hp")
@@ -111,6 +142,8 @@ void Walkin::addBaddieGroup() {
     baddie->max_velocity = max_velocity;
     baddie->max_ax *= max_ax_multiplier;
     baddie->max_ay *= max_ay_multiplier;
+
+    baddie->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
 
     baddie_group->add(baddie);
   }
@@ -254,9 +287,9 @@ void Walkin::gameLogic() {
     state->map->stopRain();
   }
 
-  if (input.keyPressed("b") > 0) {
-    state->modes.push(new Battlin(state));
-  }
+  // if (input.keyPressed("b") > 0) {
+  //   state->modes.push(new Battlin(state));
+  // }
 
   int px = party_group->characters[0]->x;
   int py = party_group->characters[0]->y;
@@ -271,6 +304,14 @@ void Walkin::gameLogic() {
     }
   }
 
+  for (Group* baddie_group : baddie_groups) {
+    for (Character* baddie : baddie_group->characters) {
+      if (baddie->hp <= 0) {
+        baddie->koBehavior();
+      }
+    }
+  }
+
   bool found_battle = false;
   for (Group* baddie_group : baddie_groups) {
     for (Character* baddie : baddie_group->characters) {
@@ -279,18 +320,35 @@ void Walkin::gameLogic() {
           found_battle = true;
           // This will leak when it pops. Gotta delete it somewhere.
           Battlin* battle = new Battlin(state);
-          int i = 1;
-          int j = 0;
-          for (Character* baddie_b : baddie_group->characters) {
-            battle->left_placements.push_back({baddie_b, i, j});
-            j += 1;
+          if (goodie->x >= baddie->x) {
+            int i = 1;
+            int j = 0;
+            for (Character* baddie_b : baddie_group->characters) {
+              battle->left_placements.push_back({baddie_b, i, j});
+              j += 1;
+            }
+            i = 0;
+            j = 0;
+            for (Character* goodie_g : party_group->characters) {
+              battle->right_placements.push_back({goodie_g, i, j});
+              j += 1;
+            }
+          } else {
+            int i = 1;
+            int j = 0;
+            for (Character* goodie_g : party_group->characters) {
+              battle->left_placements.push_back({goodie_g, i, j});
+              j += 1;
+            }
+            i = 0;
+            j = 0;
+            for (Character* baddie_b : baddie_group->characters) {
+              battle->right_placements.push_back({baddie_b, i, j});
+              j += 1;
+            }
           }
-          i = 0;
-          j = 0;
-          for (Character* goodie_g : party_group->characters) {
-            battle->right_placements.push_back({goodie_g, i, j});
-            j += 1;
-          }
+          battle->party = party_group->characters;
+          battle->initialize();
           state->modes.push(battle);
         }
       }

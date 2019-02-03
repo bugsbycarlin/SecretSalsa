@@ -126,6 +126,32 @@ void Character::seekBehavior(int x, int y) {
   }
 }
 
+void Character::koBehavior() {
+  string k = "ko_countdown_" + unique_name;
+  if (!timing.check(k)) {
+    timing.mark(k);
+  }
+  if (timing.since(k) > hot_config.getFloat("game", "ko_countdown")) {
+    hp = max_hp;
+    timing.remove(k);
+  }
+}
+
+void Character::battlePrepBehavior() {
+  if (battle_x < battle_home_x) {
+    battle_x += max_velocity / 2.0;
+  } else if (battle_x > battle_home_x) {
+    battle_x -= max_velocity / 2.0;
+  }
+  if (abs(battle_home_x - battle_x) < max_velocity / 2.0) battle_x = battle_home_x;
+  if (battle_y < battle_home_y) {
+    battle_y += max_velocity / 2.0;
+  } else if (battle_y > battle_home_y) {
+    battle_y -= max_velocity / 2.0;
+  }
+  if (abs(battle_home_y - battle_y) < max_velocity / 2.0) battle_y = battle_home_y;
+}
+
 void Character::simpleBounceAnimation() {
   //effects.makeOscillation("simple_bounce_walk_" + unique_name, hot_config.getInt("animation", "walk_bounce_height"), hot_config.getFloat("animation", "walk_bounce_speed"));
   effects.makeTween("simple_bounce_walk_" + unique_name, 0, 2 * hot_config.getInt("animation", "walk_bounce_height"), hot_config.getFloat("animation", "walk_bounce_speed"));
@@ -179,6 +205,38 @@ void Character::draw() {
     x - state->camera_x + margin_x,
     y - state->camera_y + margin_y - bounce_y,
     true, rotation, 1, direction == 1 ? true : false, false, false
+  );
+}
+
+void Character::battlePrepDraw() {
+  int bounce_y = effects.tween("simple_bounce_walk_" + unique_name, effects.CUBIC);
+  if (bounce_y > hot_config.getInt("animation", "walk_bounce_height")) {
+    bounce_y = 2 * hot_config.getInt("animation", "walk_bounce_height") - bounce_y;
+  }
+  int rotation = effects.oscillation("simple_bounce_lean_" + unique_name);
+  walkAnimation();
+
+  if (effects.finished("simple_bounce_walk_" + unique_name)) {
+    effects.start("simple_bounce_walk_" + unique_name);
+  }
+
+  graphics.drawImage(
+    animations[current_animation][current_frame],
+    battle_x + margin_x,
+    battle_y + margin_y - bounce_y,
+    true, rotation, 1, direction == 1 ? true : false, false, false
+  );
+}
+
+void Character::battleDraw() {
+  setAnimation("static");
+  setFrame(0);
+
+  graphics.drawImage(
+    animations[current_animation][current_frame],
+    battle_x + margin_x,
+    battle_y + margin_y,
+    true, 0, 1, direction == 1 ? true : false, false, false
   );
 }
 

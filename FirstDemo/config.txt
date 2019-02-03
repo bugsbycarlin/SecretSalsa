@@ -53,7 +53,11 @@
   <param type="int" name="baddie_min_hp">90</param>
   <param type="int" name="baddie_max_hp">120</param>
 
-  <param type="int" name="battle_trigger_distance">40</param>  
+  <param type="int" name="battle_trigger_distance">40</param>
+
+  <param type="float" name="ko_countdown">10</param> 
+  
+  <param type="float" name="ap_delay">0.05</param>    
 </section>
 
 <section name="menu">
@@ -122,6 +126,36 @@
 
   <param type="int" name="alt_profile_x">20</param>
   <param type="int" name="alt_profile_y">420</param>
+
+  <param type="int" name="battle_name_x">20</param>
+  <param type="int" name="battle_name_y">570</param>
+  <param type="int" name="battle_name_width">200</param>
+  <param type="int" name="battle_name_height">29</param>
+  <param type="string" name="battle_name_image_root">gradient_menu</param>
+  <param type="int" name="battle_name_margin_x">20</param>
+  <param type="int" name="battle_name_margin_y">1</param>
+  <param type="int" name="battle_name_num_lines">1</param>
+  <param type="int" name="battle_name_wrap_length">60</param>
+  <param type="bool" name="battle_name_typewriter">false</param>
+  <param type="float" name="battle_name_typewriter_delay">0.05</param>
+  <param type="string" name="battle_name_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="battle_name_font_size">20</param>
+  <param type="string" name="battle_name_font_color">#f0f8ff</param>
+
+  <param type="int" name="battle_info_card_x">20</param>
+  <param type="int" name="battle_info_card_y">597</param>
+  <param type="int" name="battle_info_card_width">240</param>
+  <param type="int" name="battle_info_card_height">110</param>
+  <param type="string" name="battle_info_card_image_root">gradient_menu</param>
+  <param type="int" name="battle_info_card_margin_x">20</param>
+  <param type="int" name="battle_info_card_margin_y">10</param>
+  <param type="int" name="battle_info_card_num_lines">3</param>
+  <param type="int" name="battle_info_card_wrap_length">40</param>
+  <param type="bool" name="battle_info_card_typewriter">false</param>
+  <param type="float" name="battle_info_card_typewriter_delay">0.03</param>
+  <param type="string" name="battle_info_card_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="battle_info_card_font_size">25</param>
+  <param type="string" name="battle_info_card_font_color">#f0f8ff</param>
 </section>
 
 <section name="animation">

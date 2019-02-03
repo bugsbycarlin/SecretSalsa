@@ -33,6 +33,15 @@ class Battlin : public Mode {
 
   Textbox* hp_box;
 
+  float ap_delay;
+
+  string mode;
+
   vector<Placement> left_placements;
   vector<Placement> right_placements;
+
+  vector<Character*> party;
+
+  map<string, Menu*> names;
+  map<string, Menu*> info_cards;
 };
