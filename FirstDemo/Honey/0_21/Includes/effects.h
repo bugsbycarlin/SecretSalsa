@@ -94,6 +94,12 @@ namespace Honey {
     bool finished(string label);
 
     /*!
+      Remove an effect.
+      @param label The effect you want to remove.
+    */
+    void remove(string label);
+
+    /*!
       Remove all effects currently stored in the Effects instance.
     */
     void removeAllEffects();

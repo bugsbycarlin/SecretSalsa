@@ -6,28 +6,34 @@
 
 #pragma once
 
+#include <queue>
 #include <string>
 
 #include "honey.h"
 #include "mode.h"
-#include "character.h"
+#include "walkingcharacter.h"
+#include "battlecharacter.h"
 
 using namespace Honey;
 using namespace std;
 
 class Battlin : public Mode {
  public:
-  struct Placement {
-    Character* character;
-    int i;
-    int j;
-  };
-
-  Battlin(State* state);
+  Battlin(State* state, vector<WalkingCharacter*> player_party, vector<WalkingCharacter*> enemy_party);
 
   void initialize();
   void logic();
   void render();
+
+  void initializeCharacters();
+  void initializeMenus();
+
+  void everybodyGetInPlace();
+  void chargeGauges();
+  void handleSelection();
+
+  void drawInfoCard();
+  void drawSelection();
 
   ~Battlin();
 
@@ -35,13 +41,43 @@ class Battlin : public Mode {
 
   float ap_delay;
 
-  string mode;
+  string mode; // prep, charging, selecting, acting, finished
 
-  vector<Placement> left_placements;
-  vector<Placement> right_placements;
+  int good_direction;
 
-  vector<Character*> party;
+  vector<WalkingCharacter*> root_player_party;
+  vector<WalkingCharacter*> root_enemy_party;
 
-  map<string, Menu*> names;
-  map<string, Menu*> info_cards;
+  vector<BattleCharacter*> player_party;
+  vector<BattleCharacter*> enemy_party;
+  vector<BattleCharacter*> everyone;
+
+  queue<BattleCharacter*> action_queue;
+  queue<BattleCharacter*> enemy_queue;
+
+  BattleCharacter* selection_character;
+  int selection_state = 1;
+  int selection_1;
+  int selection_2;
+  int selection_row;
+  int selection_column;
+
+  BattleCharacter* acting_enemy;
+
+  const int selection_1_max = 3;
+
+  // TODO Destroy all of these in the destructor
+  Menu* header;
+  Menu* info_card;
+  Menu* selection_card_1_header;
+  Menu* selection_card_2_header;
+  Menu* selection_card_1;
+  Menu* selection_card_2;
+
+  Textbox* damage_text;
+
+  Sprite* black_screen;
+
+ private:
+  string printLine(vector<string> information, vector<int> widths);
 };

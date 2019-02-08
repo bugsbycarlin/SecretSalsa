@@ -219,6 +219,10 @@ void Conversation::accept() {
 
   if (finished()) return;
 
+  if (current_element->type == "_choice") {
+    state->values["music_choice"] = choice_value;
+  }
+
   if (current_element->children.size() > 0) {
     // If there is a child conversation, push it onto the stack and start walking it
     conversation_position.push(0);
@@ -266,6 +270,7 @@ void Conversation::setMenus() {
 void Conversation::draw() {
   character_box->draw();
   conversation_box->draw();
+  graphics.setColor("#ffffff", 1.0);
   
   if (current_element->type == "_choice" && conversation_box->typewriterFinished()) {
     choice_box->draw();

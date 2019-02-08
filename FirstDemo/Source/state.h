@@ -22,6 +22,7 @@ using namespace Honey;
 using namespace std;
 
 class Mode;
+class PermanentCharacter;
 
 class State {
  public:
@@ -46,7 +47,10 @@ class State {
   int camera_target_y;
   const float camera_blend_factor = 0.2;
 
-  int player_hp;
-
   std::map<string, int> values;
+  std::map<int, string> music;
+
+  vector<PermanentCharacter*> party;
+
+  std::map<string, PermanentCharacter*> enemy_templates;
 };

@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include <deque>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "honey.h"
 #include "state.h"
+#include "permanentcharacter.h"
 
 using namespace Honey;
 using namespace std;
@@ -25,23 +25,19 @@ class Character {
   virtual void setAnimation(string animation);
   virtual void setFrame(int frame);
 
-  void walkBehavior(float ax, float ay);
-  void followBehavior(int x, int y);
-  void seekBehavior(int x, int y);
-  void koBehavior();
-
-  void battlePrepBehavior();
-
-  void simpleBounceAnimation();
-  virtual void walkAnimation();
+  void addBounceAnimation();
+  void walkAnimation();
 
   virtual void draw();
-  void battlePrepDraw();
-  void battleDraw();
+
+  void cloneFromPermanentCharacter(PermanentCharacter* character);
 
   ~Character();
 
   State* state;
+  PermanentCharacter* permanent_character;
+
+  string unique_name;
 
   string name;
   string display_name;
@@ -50,45 +46,27 @@ class Character {
   string current_animation;
   int current_frame;
 
-  float walk_animation_speed;
-
-  int direction;
   int x;
   int y;
+
+  int direction;
+
+  // Display parameters
   int margin_x;
   int margin_y;
-  float vx;
-  float vy;
 
-  deque<position> position_history;
-  const int history_size = 80;
-
-  const float velocity_tolerance = 45;
-  const float restitution = 0.85;
-
-  // const float max_velocity = 7.0;
-  // const float max_ax = 0.75;
-  // const float max_ay = 0.65;
-  // const float velocity_decay = 0.87;
-  // No longer const, set in constructor for now
-  float max_velocity;
-  float max_ax;
-  float max_ay;
-  float velocity_decay;
+  // Animation parameters
+  int bounce_y;
+  int rotation;
+  float walk_animation_speed;
 
   int hp;
   int max_hp;
-
-  float ap;
-  const float max_ap = 100;
   float ap_rate;
 
-  int battle_x;
-  int battle_y;
-  int battle_home_x;
-  int battle_home_y;
-
-  string unique_name;
+  int defense;
+  int attack_min;
+  int attack_max;
 
  protected:
   static int unique_count;

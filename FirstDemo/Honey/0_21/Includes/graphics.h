@@ -264,10 +264,9 @@ namespace Honey {
       @param y_position desired y coordinate of the image on the screen.
       @param centered whether to draw the image from the center instead of the top left.
       @param rotation desired clockwise rotation of the image on the screen in degrees.
-      @param scale desired scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
-      @param x_flip whether to flip the image on the x axis.
-      @param y_flip whether to flip the image on the y axis.
-      @param z_flip whether to flip the image on the z axis.
+      @param x_scale desired x_scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
+      @param y_scale desired x_scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
+      @param z_scale desired x_scale of the image on the screen (1 is the original size, 0.5 is half size, 2 is double size, etc).
     */
     void drawImage(
       string label,
@@ -275,10 +274,9 @@ namespace Honey {
       int y_position,
       bool centered,
       float rotation,
-      float scale,
-      bool x_flip,
-      bool y_flip,
-      bool z_flip);
+      float x_scale,
+      float y_scale,
+      float z_scale);
 
 
     /*!

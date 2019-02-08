@@ -46,41 +46,71 @@
 </section>
 
 <section name="game">
-  <param type="int" name="tune_bear_hp">127</param>
-  <param type="int" name="witchycat_hp">109</param>
-  <param type="int" name="robin_hp">83</param>
+  <param type="string" name="starting_screen">walking</param>
 
-  <param type="int" name="baddie_min_hp">90</param>
-  <param type="int" name="baddie_max_hp">120</param>
+  <param type="int" name="tune_bear_hp">127</param>
+  <param type="string" name="tune_bear_display_name">Tune Bear</param>
+  <param type="float" name="tune_bear_ap_rate">1.8</param>
+  <param type="int" name="tune_bear_defense">13</param>
+  <param type="int" name="tune_bear_attack_min">42</param>
+  <param type="int" name="tune_bear_attack_max">55</param>
+
+  <param type="int" name="witchycat_hp">109</param>
+  <param type="string" name="witchycat_display_name">Witchycat</param>
+  <param type="float" name="witchycat_ap_rate">1.8</param>
+  <param type="int" name="witchycat_defense">10</param>
+  <param type="int" name="witchycat_attack_min">35</param>
+  <param type="int" name="witchycat_attack_max">39</param>
+  
+  <param type="int" name="robin_hp">83</param>
+  <param type="string" name="robin_display_name">Robin</param>
+  <param type="float" name="robin_ap_rate">2.4</param>
+  <param type="int" name="robin_defense">8</param>
+  <param type="int" name="robin_attack_min">25</param>
+  <param type="int" name="robin_attack_max">31</param>
+
+  <param type="int" name="bigdog_hp">90</param>
+  <param type="string" name="bigdog_display_name">Big Dog</param>
+  <param type="float" name="bigdog_ap_rate">1.6</param>
+  <param type="int" name="bigdog_defense">8</param>
+  <param type="int" name="bigdog_attack_min">33</param>
+  <param type="int" name="bigdog_attack_max">28</param>
 
   <param type="int" name="battle_trigger_distance">40</param>
 
-  <param type="float" name="ko_countdown">10</param> 
+  <param type="float" name="ko_countdown">10</param>
   
-  <param type="float" name="ap_delay">0.05</param>    
+  <param type="float" name="ap_delay">0.05</param>
+
+  <param type="float" name="default_battle_jump_time">0.5</param>
+  <param type="float" name="default_battle_hold_time">0.1</param>
+  <param type="float" name="battle_finish_time">1.5</param>
+
+  <param type="float" name="bigdog_battle_jump_time">0.4</param>
+  <param type="float" name="bigdog_battle_hold_time">0.08</param>
 </section>
 
 <section name="menu">
   <param type="int" name="character_x">20</param>
-  <param type="int" name="character_y">570</param>
+  <param type="int" name="character_y">568</param>
   <param type="int" name="character_width">200</param>
-  <param type="int" name="character_height">29</param>
-  <param type="string" name="character_image_root">gradient_menu</param>
+  <param type="int" name="character_height">31</param>
+  <param type="string" name="character_image_root">notebook_menu</param>
   <param type="int" name="character_margin_x">20</param>
-  <param type="int" name="character_margin_y">1</param>
+  <param type="int" name="character_margin_y">0</param>
   <param type="int" name="character_num_lines">1</param>
   <param type="int" name="character_wrap_length">60</param>
   <param type="bool" name="character_typewriter">false</param>
   <param type="float" name="character_typewriter_delay">0.05</param>
   <param type="string" name="character_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
   <param type="int" name="character_font_size">20</param>
-  <param type="string" name="character_font_color">#f0f8ff</param>
+  <param type="string" name="character_font_color">#000000</param>
 
   <param type="int" name="conversation_x">20</param>
   <param type="int" name="conversation_y">597</param>
   <param type="int" name="conversation_width">640</param>
   <param type="int" name="conversation_height">110</param>
-  <param type="string" name="conversation_image_root">gradient_menu</param>
+  <param type="string" name="conversation_image_root">notebook_menu</param>
   <param type="int" name="conversation_margin_x">20</param>
   <param type="int" name="conversation_margin_y">10</param>
   <param type="int" name="conversation_num_lines">3</param>
@@ -89,13 +119,13 @@
   <param type="float" name="conversation_typewriter_delay">0.03</param>
   <param type="string" name="conversation_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
   <param type="int" name="conversation_font_size">25</param>
-  <param type="string" name="conversation_font_color">#f0f8ff</param>
+  <param type="string" name="conversation_font_color">#000000</param>
 
   <param type="int" name="choice_x">20</param>
   <param type="int" name="choice_y">30</param>
   <param type="int" name="choice_width">1000</param>
-  <param type="int" name="choice_height">160</param>
-  <param type="string" name="choice_image_root">gradient_menu</param>
+  <param type="int" name="choice_height">170</param>
+  <param type="string" name="choice_image_root">notebook_menu</param>
   <param type="int" name="choice_margin_x">40</param>
   <param type="int" name="choice_margin_y">10</param>
   <param type="int" name="choice_num_lines">5</param>
@@ -104,22 +134,22 @@
   <param type="float" name="choice_typewriter_delay">0.03</param>
   <param type="string" name="choice_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
   <param type="int" name="choice_font_size">25</param>
-  <param type="string" name="choice_font_color">#f0f8ff</param>
+  <param type="string" name="choice_font_color">#000000</param>
 
   <param type="int" name="lap_count_x">20</param>
   <param type="int" name="lap_count_y">20</param>
-  <param type="int" name="lap_count_width">120</param>
-  <param type="int" name="lap_count_height">30</param>
-  <param type="string" name="lap_count_image_root">gradient_menu</param>
+  <param type="int" name="lap_count_width">95</param>
+  <param type="int" name="lap_count_height">32</param>
+  <param type="string" name="lap_count_image_root">notebook_menu</param>
   <param type="int" name="lap_count_margin_x">10</param>
-  <param type="int" name="lap_count_margin_y">2</param>
+  <param type="int" name="lap_count_margin_y">1</param>
   <param type="int" name="lap_count_num_lines">1</param>
   <param type="int" name="lap_count_wrap_length">12</param>
   <param type="bool" name="lap_count_typewriter">false</param>
   <param type="float" name="lap_count_typewriter_delay">0.03</param>
   <param type="string" name="lap_count_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
   <param type="int" name="lap_count_font_size">20</param>
-  <param type="string" name="lap_count_font_color">#f0f8ff</param>
+  <param type="string" name="lap_count_font_color">#000000</param>
 
   <param type="int" name="profile_x">680</param>
   <param type="int" name="profile_y">570</param>
@@ -127,35 +157,85 @@
   <param type="int" name="alt_profile_x">20</param>
   <param type="int" name="alt_profile_y">420</param>
 
-  <param type="int" name="battle_name_x">20</param>
-  <param type="int" name="battle_name_y">570</param>
-  <param type="int" name="battle_name_width">200</param>
-  <param type="int" name="battle_name_height">29</param>
-  <param type="string" name="battle_name_image_root">gradient_menu</param>
-  <param type="int" name="battle_name_margin_x">20</param>
-  <param type="int" name="battle_name_margin_y">1</param>
-  <param type="int" name="battle_name_num_lines">1</param>
-  <param type="int" name="battle_name_wrap_length">60</param>
-  <param type="bool" name="battle_name_typewriter">false</param>
-  <param type="float" name="battle_name_typewriter_delay">0.05</param>
-  <param type="string" name="battle_name_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
-  <param type="int" name="battle_name_font_size">20</param>
-  <param type="string" name="battle_name_font_color">#f0f8ff</param>
+  <param type="int" name="battle_header_x">20</param>
+  <param type="int" name="battle_header_y">535</param>
+  <param type="int" name="battle_header_width">580</param>
+  <param type="int" name="battle_header_height">35</param>
+  <param type="string" name="battle_header_image_root">notebook_menu</param>
+  <param type="int" name="battle_header_margin_x">20</param>
+  <param type="int" name="battle_header_margin_y">0</param>
+  <param type="int" name="battle_header_num_lines">1</param>
+  <param type="int" name="battle_header_wrap_length">120</param>
+  <param type="bool" name="battle_header_typewriter">false</param>
+  <param type="float" name="battle_header_typewriter_delay">0.05</param>
+  <param type="string" name="battle_header_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="battle_header_font_size">25</param>
+  <param type="string" name="battle_header_font_color">#000000</param>
 
   <param type="int" name="battle_info_card_x">20</param>
-  <param type="int" name="battle_info_card_y">597</param>
-  <param type="int" name="battle_info_card_width">240</param>
-  <param type="int" name="battle_info_card_height">110</param>
-  <param type="string" name="battle_info_card_image_root">gradient_menu</param>
+  <param type="int" name="battle_info_card_y">567</param>
+  <param type="int" name="battle_info_card_width">580</param>
+  <param type="int" name="battle_info_card_height">140</param>
+  <param type="string" name="battle_info_card_image_root">notebook_menu</param>
   <param type="int" name="battle_info_card_margin_x">20</param>
   <param type="int" name="battle_info_card_margin_y">10</param>
-  <param type="int" name="battle_info_card_num_lines">3</param>
-  <param type="int" name="battle_info_card_wrap_length">40</param>
+  <param type="int" name="battle_info_card_num_lines">4</param>
+  <param type="int" name="battle_info_card_wrap_length">120</param>
   <param type="bool" name="battle_info_card_typewriter">false</param>
   <param type="float" name="battle_info_card_typewriter_delay">0.03</param>
   <param type="string" name="battle_info_card_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
   <param type="int" name="battle_info_card_font_size">25</param>
-  <param type="string" name="battle_info_card_font_color">#f0f8ff</param>
+  <param type="string" name="battle_info_card_font_color">#000000</param>
+
+  <param type="int" name="selection_card_1_header_x">560</param>
+  <param type="int" name="selection_card_1_header_y">535</param>
+  <param type="int" name="selection_card_1_header_width">180</param>
+  <param type="int" name="selection_card_1_header_height">35</param>
+  <param type="string" name="selection_card_1_header_image_root">notebook_menu</param>
+  <param type="int" name="selection_card_1_header_margin_x">20</param>
+  <param type="int" name="selection_card_1_header_margin_y">0</param>
+  <param type="int" name="selection_card_1_header_num_lines">1</param>
+  <param type="int" name="selection_card_1_header_wrap_length">60</param>
+  <param type="bool" name="selection_card_1_header_typewriter">false</param>
+  <param type="float" name="selection_card_1_header_typewriter_delay">0.05</param>
+  <param type="string" name="selection_card_1_header_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="selection_card_1_header_font_size">25</param>
+  <param type="string" name="selection_card_1_header_font_color">#000000</param>
+
+  <param type="int" name="selection_card_1_x">560</param>
+  <param type="int" name="selection_card_1_y">567</param>
+  <param type="int" name="selection_card_1_width">180</param>
+  <param type="int" name="selection_card_1_height">140</param>
+  <param type="string" name="selection_card_1_image_root">notebook_menu</param>
+  <param type="int" name="selection_card_1_margin_x">20</param>
+  <param type="int" name="selection_card_1_margin_y">10</param>
+  <param type="int" name="selection_card_1_num_lines">4</param>
+  <param type="int" name="selection_card_1_wrap_length">60</param>
+  <param type="bool" name="selection_card_1_typewriter">false</param>
+  <param type="float" name="selection_card_1_typewriter_delay">0.03</param>
+  <param type="string" name="selection_card_1_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="selection_card_1_font_size">25</param>
+  <param type="string" name="selection_card_1_font_color">#000000</param>
+
+  <param type="int" name="battle_choice_x">720</param>
+  <param type="int" name="battle_choice_y">594</param>
+  <param type="int" name="battle_choice_y_spacing">28</param>
+
+
+  <param type="int" name="battle_gauge_outline_x">472</param>
+  <param type="int" name="battle_gauge_outline_y">595</param>
+  <param type="int" name="battle_gauge_spacing">28</param>
+  <param type="int" name="battle_gauge_fill_margin_x">0</param>
+  <param type="int" name="battle_gauge_fill_margin_y">1</param>
+</section>
+
+<section name="music">
+  <param type="string" name="music_1">crepuscolo_su_saturno.mp3</param>
+  <param type="string" name="music_2">water.mp3</param>
+  <param type="string" name="music_3">sangue_su_callisto.mp3</param>
+  <param type="string" name="music_4">piano.mp3</param>
+  <param type="string" name="music_5">fog_burning_dawn.mp3</param>
+  <param type="string" name="battle">battle_fanfare.mp3</param>
 </section>
 
 <section name="animation">

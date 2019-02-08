@@ -9,7 +9,6 @@
 using namespace std;
 using namespace Honey;
 
-
 // Simple Debug Print
 void db(int x) {
   printf("Here %d\n", x);
@@ -17,98 +16,40 @@ void db(int x) {
 
 Walkin::Walkin(State* state) {
   this->state = state;
-  party_group = new Group(state);
+  party = new WalkingParty(state);
+  found_battle = false;
 }
 
-void Walkin::initializeCharacters() {
-  Character* character = new Character(state);
+void Walkin::initializeWalkingParty() {
+  for (PermanentCharacter* p : state->party) {
+    WalkingCharacter* character = new WalkingCharacter(state);
+    character->cloneFromPermanentCharacter(p);
+    character->addAnimation("static", {p->name});
+    if (p->name == "robin") {
+      character->margin_y = hot_config.getInt("layout", "player_margin_y") - 50;
+      character->addAnimation("walking", {"robin", "robin_flapping"});
+    }
+    party->add(character);
+  }
 
-  character->name = "tune_bear";
-  character->display_name = "Tune Bear";
-  character->max_hp = hot_config.getInt("game", "tune_bear_hp");
-  character->hp = character->max_hp;character->direction = 1;
-  character->x = hot_config.getInt("layout", "player_starting_x");
-  character->y = hot_config.getInt("layout", "player_starting_y");
-  character->margin_x = hot_config.getInt("layout", "player_margin_x");
-  character->margin_y = hot_config.getInt("layout", "player_margin_y");
-  character->vx = 0;
-  character->vy = 0;
-  character->addAnimation("static", {"tune_bear"});
-  character->simpleBounceAnimation();
-  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
-
-  party_group->add(character);
-
-  character = new Character(state);
-
-  character->name = "witchycat";
-  character->display_name = "Witchycat";
-  character->max_hp = hot_config.getInt("game", "witchycat_hp");
-  character->hp = character->max_hp;
-  character->direction = 1;
-  character->x = hot_config.getInt("layout", "player_starting_x");
-  character->y = hot_config.getInt("layout", "player_starting_y");
-  character->margin_x = hot_config.getInt("layout", "player_margin_x");
-  character->margin_y = hot_config.getInt("layout", "player_margin_y");
-  character->vx = 0;
-  character->vy = 0;
-  character->addAnimation("static", {"witchycat"});
-  character->simpleBounceAnimation();
-  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
-
-  party_group->add(character);
-
-  character = new Character(state);
-
-  character->name = "witchycat2";
-  character->display_name = "Witchycat 2";
-  character->max_hp = hot_config.getInt("game", "witchycat_hp");
-  character->hp = character->max_hp;
-  character->direction = 1;
-  character->x = hot_config.getInt("layout", "player_starting_x");
-  character->y = hot_config.getInt("layout", "player_starting_y");
-  character->margin_x = hot_config.getInt("layout", "player_margin_x");
-  character->margin_y = hot_config.getInt("layout", "player_margin_y");
-  character->vx = 0;
-  character->vy = 0;
-  character->addAnimation("static", {"witchycat"});
-  character->simpleBounceAnimation();
-  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
-
-  party_group->add(character);
-
-  character = new Character(state);
-
-  character->name = "robin";
-  character->display_name = "Robin";
-  character->max_hp = hot_config.getInt("game", "robin_hp");
-  character->hp = character->max_hp;
-  character->direction = 1;
-  character->x = hot_config.getInt("layout", "player_starting_x");
-  character->y = hot_config.getInt("layout", "player_starting_y");
-  character->margin_x = hot_config.getInt("layout", "player_margin_x");
-  character->margin_y = hot_config.getInt("layout", "player_margin_y") - 50;
-  character->vx = 0;
-  character->vy = 0;
-  character->addAnimation("static", {"robin"});
-  character->addAnimation("walking", {"robin", "robin_flapping"});
-  character->simpleBounceAnimation();
-  character->walk_animation_speed = hot_config.getFloat("animation", "robin_flapping_animation_speed");
-  printf("Robin animation speed: %0.2f\n", character->walk_animation_speed);
-  character->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
-
-  party_group->add(character);
+  if (state->values.count("music_choice") != 1) {
+    printf("No music chosen.\n");
+    state->values["music_choice"] = math_utils.randomInt(0,4);
+  }
+  printf("This is the song: %s\n", state->music[state->values["music_choice"]].c_str());
+  sound.playMusic(state->music[state->values["music_choice"]], -1);
+  
 }
 
-void Walkin::addBaddieGroup() {
-  Group* baddie_group = new Group(state);
+void Walkin::addBaddieParty() {
+  WalkingParty* baddie_party = new WalkingParty(state);
 
   float max_velocity = 6.0 + 2.0 * (math_utils.randomInt(0, 10) / 10.0);
   float max_ax_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
   float max_ay_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
 
   int num_baddies_roll = math_utils.randomInt(0,20);
-  int num_baddies = 1;
+  int num_baddies = 3;
   if (num_baddies_roll > 17) {
     num_baddies = 3;
   } else if (num_baddies_roll > 13) {
@@ -116,15 +57,15 @@ void Walkin::addBaddieGroup() {
   }
 
   for (int i = 0; i < num_baddies; i++) {
-    Character* baddie = new Character(state);
+    WalkingCharacter* baddie = new WalkingCharacter(state);
+    baddie->cloneFromPermanentCharacter(state->enemy_templates["bigdog"]);
 
-    baddie->name = "big_dog";
-    baddie->display_name = "Big Dog";
     baddie->max_hp = math_utils.randomInt(
-      hot_config.getInt("game", "baddie_min_hp"),
-      hot_config.getInt("game", "baddie_max_hp")
+      hot_config.getInt("game", "bigdog_hp") - 10,
+      hot_config.getInt("game", "bigdog_hp") + 10
     );
     baddie->hp = baddie->max_hp;
+    baddie->ap_rate = hot_config.getFloat("game", "bigdog_ap_rate") + 0.8 * (math_utils.randomInt(0,100) / 100.0);
 
     baddie->direction = 1;
     baddie->x = hot_config.getInt("layout", "baddie_starting_x");
@@ -133,22 +74,21 @@ void Walkin::addBaddieGroup() {
     baddie->margin_y = hot_config.getInt("layout", "player_margin_y");
     baddie->vx = 0;
     baddie->vy = 0;
-    baddie->addAnimation("static", {"baddie_static"});
-    baddie->addAnimation("walking", {"baddie_walk_1", "baddie_walk_2"});
-    baddie->addAnimation("ko", {"baddie_ko"});
-    baddie->simpleBounceAnimation();
+    baddie->addAnimation("static", {"bigdog_static"});
+    baddie->addAnimation("attacking", {"bigdog_kick"});
+    baddie->addAnimation("walking", {"bigdog_walk_2_3", "bigdog_walk_2_4"});
+    baddie->addAnimation("ko", {"bigdog_ko"});
+    baddie->addBounceAnimation();
     baddie->walk_animation_speed = hot_config.getFloat("animation", "baddie_walking_speed");
 
     baddie->max_velocity = max_velocity;
     baddie->max_ax *= max_ax_multiplier;
     baddie->max_ay *= max_ay_multiplier;
 
-    baddie->ap_rate = 0.8 + 0.4 * (math_utils.randomInt(0,100) / 100.0);
-
-    baddie_group->add(baddie);
+    baddie_party->add(baddie);
   }
 
-  baddie_groups.push_back(baddie_group);
+  baddie_parties.push_back(baddie_party);
   baddie_seek_numbers.push_back(0);
   box* seek_box = new box();
   seek_box->top = lap_seek_points[0].top;
@@ -201,11 +141,11 @@ void Walkin::initialize() {
     {352, 817, 301, 858}
   };
 
-  initializeCharacters();
-  addBaddieGroup();
+  initializeWalkingParty();
+  addBaddieParty();
 
-  state->camera_x = party_group->characters[0]->x - (state->screen_width / 2.0);
-  state->camera_y = party_group->characters[0]->y - (state->screen_height / 1.5);
+  state->camera_x = party->characters[0]->x - (state->screen_width / 2.0);
+  state->camera_y = party->characters[0]->y - (state->screen_height / 1.5);
 }
 
 void Walkin::movementLogic() {
@@ -230,21 +170,21 @@ void Walkin::movementLogic() {
     ay = 1;
   }
 
-  party_group->walk(ax, ay);
+  party->walk(ax, ay);
 
 
-  int px = party_group->characters[0]->x;
-  int py = party_group->characters[0]->y;
-  for (int i = 0; i < baddie_groups.size(); i++) {
-    Character* baddie = (baddie_groups[i])->characters[0];
+  int px = party->characters[0]->x;
+  int py = party->characters[0]->y;
+  for (int i = 0; i < baddie_parties.size(); i++) {
+    WalkingCharacter* baddie = (baddie_parties[i])->characters[0];
     if (baddie->hp > 0) {
       // if player is in the 200 pixel box ahead of baddie, seek player
       if ((baddie->direction == 1 && px >= baddie->x && px < baddie->x + 200 && py > baddie->y - 100 && py < baddie->y + 200)
       || (baddie->direction == -1 && px <= baddie->x && px > baddie->x - 200 && py > baddie->y - 100 && py < baddie->y + 200)) {
-        baddie_groups[i]->seek(px, py);
+        baddie_parties[i]->seek(px, py);
       } else {
         box* target = baddie_seek_points[i];
-        baddie_groups[i]->seek(target->top, target->left);
+        baddie_parties[i]->seek(target->top, target->left);
         if (math_utils.distance(target->top, target->left, baddie->x, baddie->y) < 30) {
           baddie_seek_numbers[i] += 1;
           if (baddie_seek_numbers[i] >= lap_seek_points.size()) baddie_seek_numbers[i] = 0;
@@ -265,8 +205,8 @@ void Walkin::animationLogic() {
 }
 
 void Walkin::cameraLogic() {
-  state->camera_target_x = party_group->characters[0]->x - (state->screen_width / 2.0);
-  state->camera_target_y = party_group->characters[0]->y - (state->screen_height / 1.5);
+  state->camera_target_x = party->characters[0]->x - (state->screen_width / 2.0);
+  state->camera_target_y = party->characters[0]->y - (state->screen_height / 1.5);
 
   if (state->camera_x != state->camera_target_x) state->camera_x = state->camera_blend_factor * state->camera_x + (1 - state->camera_blend_factor) * state->camera_target_x;
   if (state->camera_y != state->camera_target_y) state->camera_y = state->camera_blend_factor * state->camera_y + (1 - state->camera_blend_factor) * state->camera_target_y;
@@ -287,12 +227,22 @@ void Walkin::gameLogic() {
     state->map->stopRain();
   }
 
+  // This happens if you survive battle.
+  if (found_battle) {
+    found_battle = false;
+    for (WalkingCharacter* character : current_battle_baddies->characters) {
+      character->hp = 0;
+    }
+    sound.playMusic(state->music[state->values["music_choice"]], -1);
+    sound.setMusicVolume(1.0);
+  }
+
   // if (input.keyPressed("b") > 0) {
   //   state->modes.push(new Battlin(state));
   // }
 
-  int px = party_group->characters[0]->x;
-  int py = party_group->characters[0]->y;
+  int px = party->characters[0]->x;
+  int py = party->characters[0]->y;
   for (int i = 0; i < lap_zones.size(); i++) {
     if (lap_zone_counter == i && checkBox(px, py, lap_zones[i])) {
       lap_zone_counter += 1;
@@ -300,54 +250,32 @@ void Walkin::gameLogic() {
     if (lap_zone_counter == 4) {
       lap_zone_counter = 0;
       state->store("laps", state->get("laps") + 1);
-      addBaddieGroup();
+      addBaddieParty();
     }
   }
 
-  for (Group* baddie_group : baddie_groups) {
-    for (Character* baddie : baddie_group->characters) {
+  for (WalkingParty* baddie_party : baddie_parties) {
+    for (WalkingCharacter* baddie : baddie_party->characters) {
       if (baddie->hp <= 0) {
         baddie->koBehavior();
       }
     }
   }
 
-  bool found_battle = false;
-  for (Group* baddie_group : baddie_groups) {
-    for (Character* baddie : baddie_group->characters) {
-      for (Character* goodie : party_group->characters) {
+  found_battle = false;
+  for (WalkingParty* baddie_party : baddie_parties) {
+    for (WalkingCharacter* baddie : baddie_party->characters) {
+      for (WalkingCharacter* goodie : party->characters) {
         if (baddie->hp > 0 && math_utils.distance(baddie->x, baddie->y, goodie->x, goodie->y) < battle_trigger_distance && !found_battle) {
           found_battle = true;
           // This will leak when it pops. Gotta delete it somewhere.
-          Battlin* battle = new Battlin(state);
+          Battlin* battle = new Battlin(state, party->characters, baddie_party->characters);
+          current_battle_baddies = baddie_party;
           if (goodie->x >= baddie->x) {
-            int i = 1;
-            int j = 0;
-            for (Character* baddie_b : baddie_group->characters) {
-              battle->left_placements.push_back({baddie_b, i, j});
-              j += 1;
-            }
-            i = 0;
-            j = 0;
-            for (Character* goodie_g : party_group->characters) {
-              battle->right_placements.push_back({goodie_g, i, j});
-              j += 1;
-            }
+            battle->good_direction = -1;
           } else {
-            int i = 1;
-            int j = 0;
-            for (Character* goodie_g : party_group->characters) {
-              battle->left_placements.push_back({goodie_g, i, j});
-              j += 1;
-            }
-            i = 0;
-            j = 0;
-            for (Character* baddie_b : baddie_group->characters) {
-              battle->right_placements.push_back({baddie_b, i, j});
-              j += 1;
-            }
+            battle->good_direction = 1;
           }
-          battle->party = party_group->characters;
           battle->initialize();
           state->modes.push(battle);
         }
@@ -370,11 +298,11 @@ void Walkin::logic() {
 void Walkin::render() {
   state->map->draw(-state->camera_x, -state->camera_y);
 
-  for (Group* baddie_group : baddie_groups) {
-    baddie_group->draw();
+  for (WalkingParty* baddie_party : baddie_parties) {
+    baddie_party->draw();
   }
 
-  party_group->draw();
+  party->draw();
 
   graphics.drawImage(
     "coach_bulldog",

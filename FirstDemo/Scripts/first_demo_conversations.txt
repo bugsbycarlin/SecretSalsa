@@ -24,15 +24,15 @@ _conversation training_introduction
   _speech Coach Bulldog: LET'S DO THIS! Go dogs.
   _choice Tune Bear: (To himself) Hmm, which music will Tune Bear use for this challenge?
     _choice_value Galapaghost (Fast song, +Speed, +Agility)
-      _action tune_bear_music = Galapaghost
+      _action tune_bear_music = galapaghost
     _choice_value Super Brute Brothers (Resolute song, +Endurance, +HP)
-      _action tune_bear_music = Super Brute Brothers
+      _action tune_bear_music = super_brute_brothers
     _choice_value The Vicious Venues (Berserk song, High Chance of Critical Hit)
-      _action tune_bear_music = The Vicious Venues
+      _action tune_bear_music = the_vicious_venues
     _choice_value Wimpsteed (Sad song, -Speed, -Enemy Attack)
-      _action tune_bear_music = Wimpsteed
+      _action tune_bear_music = wimpsteed
     _choice_value The Books (Chill song, Immune to Rain)
-      _action tune_bear_music = The Books
+      _action tune_bear_music = the_books
 
 _conversation training_failure
   _speech Coach Bulldog: Looks like my boys brought you DOWN.

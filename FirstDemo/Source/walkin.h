@@ -9,10 +9,10 @@
 #include <string>
 
 #include "honey.h"
-#include "character.h"
-#include "group.h"
+#include "walkingparty.h"
 #include "mode.h"
 #include "battlin.h"
+#include "permanentcharacter.h"
 
 using namespace Honey;
 using namespace std;
@@ -25,8 +25,8 @@ class Walkin : public Mode {
   void logic();
   void render();
 
-  void initializeCharacters();
-  void addBaddieGroup();
+  void initializeWalkingParty();
+  void addBaddieParty();
 
   void movementLogic();
   void animationLogic();
@@ -40,10 +40,12 @@ class Walkin : public Mode {
   int coach_bulldog_x;
   int coach_bulldog_y;
 
-  Group* party_group;
-  vector<Group*> baddie_groups;
+  WalkingParty* party;
+  vector<WalkingParty*> baddie_parties;
   vector<box*> baddie_seek_points;
   vector<int> baddie_seek_numbers;
+
+  WalkingParty* current_battle_baddies;
 
   // Textbox* hp_box;
   // Textbox* laps_box;
@@ -54,4 +56,5 @@ class Walkin : public Mode {
   Menu* lap_count_box;
 
   int battle_trigger_distance;
+  bool found_battle;
 };

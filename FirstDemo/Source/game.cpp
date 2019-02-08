@@ -29,14 +29,14 @@ void Game::initialize() {
 
   state->map = new Map(hot_config.getString("layout", "map_name"));
 
-  state->player_hp = 1000;
   state->store("laps", 0);
 
   graphics.addImages("Art/", {
-    "baddie_static",
-    "baddie_walk_1",
-    "baddie_walk_2",
-    "baddie_ko",
+    "bigdog_static",
+    "bigdog_walk_2_3",
+    "bigdog_walk_2_4",
+    "bigdog_ko",
+    "bigdog_kick",
     "coach_bulldog",
     "coach_bulldog_profile",
     "tune_bear",
@@ -44,11 +44,71 @@ void Game::initialize() {
     "robin_flapping",
     "witchycat",
     "tune_bear_profile",
-    "choice_arrow"
+    "choice_arrow",
+    "choice_arrow_2",
+    "choice_hand",
+    "charge_gauge_outline",
+    "charge_gauge_orange_fill",
+    "charge_gauge_green_fill",
+    "attack_slash_thick",
+    "black_screen"
   });
 
-  //state->modes.push(new Talkin(state));
-  state->modes.push(new Walkin(state));
+  PermanentCharacter* p;
+
+  p = new PermanentCharacter(state);
+  p->loadFromConfig("tune_bear");
+  state->party.push_back(p);
+
+  p = new PermanentCharacter(state);
+  p->loadFromConfig("witchycat");
+  state->party.push_back(p);
+
+  p = new PermanentCharacter(state);
+  p->loadFromConfig("robin");
+  state->party.push_back(p);
+
+  p = new PermanentCharacter(state);
+  p->loadFromConfig("bigdog");
+  state->enemy_templates["bigdog"] = p;
+
+  layouts.makeTileLayout(
+    "battle_left_layout",
+    hot_config.getInt("layout", "battle_left_layout_x"),
+    hot_config.getInt("layout", "battle_left_layout_y"),
+    hot_config.getInt("layout", "battle_left_layout_x_margin"),
+    hot_config.getInt("layout", "battle_left_layout_y_margin")
+  );
+
+  layouts.makeTileLayout(
+    "battle_right_layout",
+    hot_config.getInt("layout", "battle_right_layout_x"),
+    hot_config.getInt("layout", "battle_right_layout_y"),
+    hot_config.getInt("layout", "battle_right_layout_x_margin"),
+    hot_config.getInt("layout", "battle_right_layout_y_margin")
+  );
+
+  sound.addMusics("Music/", {
+    "crepuscolo_su_saturno",
+    "water",
+    "sangue_su_callisto",
+    "piano",
+    "fog_burning_dawn",
+    "battle_fanfare"
+  });
+
+  state->music[0] = "crepuscolo_su_saturno";
+  state->music[1] = "water";
+  state->music[2] = "sangue_su_callisto";
+  state->music[3] = "piano";
+  state->music[4] = "fog_burning_dawn";
+
+  if (hot_config.getString("game", "starting_screen") == "talking") {
+    state->modes.push(new Talkin(state));
+  } else if (hot_config.getString("game", "starting_screen") == "walking") {
+    state->modes.push(new Walkin(state));
+  }
+  
   state->modes.top()->initialize();
 }
 
