@@ -97,6 +97,17 @@ void Game::initialize() {
     "battle_fanfare"
   });
 
+  sound.addSounds("Sound/", {
+    "select_sound",
+    "accept_sound",
+    "cancel_sound",
+    "bigdog_attack",
+    "tune_bear_attack",
+    "robin_attack",
+    "witchycat_attack",
+    "thunder"
+  });
+
   state->music[0] = "crepuscolo_su_saturno";
   state->music[1] = "water";
   state->music[2] = "sangue_su_callisto";

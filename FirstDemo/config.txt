@@ -46,7 +46,7 @@
 </section>
 
 <section name="game">
-  <param type="string" name="starting_screen">walking</param>
+  <param type="string" name="starting_screen">talking</param>
 
   <param type="int" name="tune_bear_hp">127</param>
   <param type="string" name="tune_bear_display_name">Tune Bear</param>
@@ -77,8 +77,8 @@
   <param type="int" name="bigdog_attack_max">28</param>
 
   <param type="int" name="battle_trigger_distance">40</param>
-
-  <param type="float" name="ko_countdown">10</param>
+  <param type="float" name="ko_countdown">20</param>
+  <param type="float" name="post_battle_grace_period">3.0</param>
   
   <param type="float" name="ap_delay">0.05</param>
 

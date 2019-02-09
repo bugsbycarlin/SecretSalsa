@@ -55,6 +55,9 @@ class Walkin : public Mode {
   int lap_zone_counter;
   Menu* lap_count_box;
 
+  int wait_for_rain;
+
   int battle_trigger_distance;
   bool found_battle;
+  int post_battle_counter;
 };

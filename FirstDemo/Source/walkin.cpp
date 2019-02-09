@@ -44,16 +44,16 @@ void Walkin::initializeWalkingParty() {
 void Walkin::addBaddieParty() {
   WalkingParty* baddie_party = new WalkingParty(state);
 
-  float max_velocity = 6.0 + 2.0 * (math_utils.randomInt(0, 10) / 10.0);
+  float max_velocity = 4.0 + 5.0 * (math_utils.randomInt(0, 10) / 10.0);
   float max_ax_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
   float max_ay_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
 
   int num_baddies_roll = math_utils.randomInt(0,20);
-  int num_baddies = 3;
-  if (num_baddies_roll > 17) {
+  int num_baddies = 2;
+  if (num_baddies_roll > 15) {
     num_baddies = 3;
-  } else if (num_baddies_roll > 13) {
-    num_baddies = 2;
+  } else if (num_baddies_roll > 12) {
+    num_baddies = 1;
   }
 
   for (int i = 0; i < num_baddies; i++) {
@@ -146,6 +146,11 @@ void Walkin::initialize() {
 
   state->camera_x = party->characters[0]->x - (state->screen_width / 2.0);
   state->camera_y = party->characters[0]->y - (state->screen_height / 1.5);
+
+  wait_for_rain = math_utils.randomInt(20,80);
+  timing.mark("wait_for_rain");
+
+  timing.mark("walking_fade_in");
 }
 
 void Walkin::movementLogic() {
@@ -220,21 +225,26 @@ void Walkin::cameraLogic() {
 void Walkin::gameLogic() {
   lap_count_box->setText(to_string(state->get("laps")) + (state->get("laps") == 1 ? " LAP" : " LAPS"));
 
-  if (input.keyPressed("r") > 0) {
-    state->map->startRain();
-  }
-  if (input.keyPressed("s") > 0) {
-    state->map->stopRain();
-  }
-
-  // This happens if you survive battle.
+  // This happens if you survive battle. Comes after battle pop.
   if (found_battle) {
     found_battle = false;
     for (WalkingCharacter* character : current_battle_baddies->characters) {
       character->hp = 0;
     }
+    for (WalkingCharacter* character : party->characters) {
+      character->cloneFromPermanentCharacter(character->permanent_character);
+    }
+    timing.mark("post_battle_grace");
     sound.playMusic(state->music[state->values["music_choice"]], -1);
     sound.setMusicVolume(1.0);
+  }
+
+  if (timing.since("wait_for_rain") > wait_for_rain 
+    && state->map->raining == false
+    && (!timing.check("post_battle_grace") || 
+    timing.since("post_battle_grace") > hot_config.getFloat("game", "post_battle_grace_period"))) {
+    state->map->startRain();
+    sound.playSound("thunder", 1);
   }
 
   // if (input.keyPressed("b") > 0) {
@@ -263,21 +273,24 @@ void Walkin::gameLogic() {
   }
 
   found_battle = false;
-  for (WalkingParty* baddie_party : baddie_parties) {
-    for (WalkingCharacter* baddie : baddie_party->characters) {
-      for (WalkingCharacter* goodie : party->characters) {
-        if (baddie->hp > 0 && math_utils.distance(baddie->x, baddie->y, goodie->x, goodie->y) < battle_trigger_distance && !found_battle) {
-          found_battle = true;
-          // This will leak when it pops. Gotta delete it somewhere.
-          Battlin* battle = new Battlin(state, party->characters, baddie_party->characters);
-          current_battle_baddies = baddie_party;
-          if (goodie->x >= baddie->x) {
-            battle->good_direction = -1;
-          } else {
-            battle->good_direction = 1;
+  if (!timing.check("post_battle_grace") || 
+    timing.since("post_battle_grace") > hot_config.getFloat("game", "post_battle_grace_period")) {
+    for (WalkingParty* baddie_party : baddie_parties) {
+      for (WalkingCharacter* baddie : baddie_party->characters) {
+        for (WalkingCharacter* goodie : party->characters) {
+          if (baddie->hp > 0 && math_utils.distance(baddie->x, baddie->y, goodie->x, goodie->y) < battle_trigger_distance && !found_battle) {
+            found_battle = true;
+            // This will leak when it pops. Gotta delete it somewhere.
+            Battlin* battle = new Battlin(state, party->characters, baddie_party->characters);
+            current_battle_baddies = baddie_party;
+            if (goodie->x >= baddie->x) {
+              battle->good_direction = -1;
+            } else {
+              battle->good_direction = 1;
+            }
+            battle->initialize();
+            state->modes.push(battle);
           }
-          battle->initialize();
-          state->modes.push(battle);
         }
       }
     }
@@ -302,7 +315,15 @@ void Walkin::render() {
     baddie_party->draw();
   }
 
-  party->draw();
+  post_battle_counter += 1;
+  if (!timing.check("post_battle_grace") ||
+    timing.since("post_battle_grace") > hot_config.getFloat("game", "post_battle_grace_period")) {
+    party->draw();
+  } else {
+    if (post_battle_counter % 2 == 0) {
+      party->draw();
+    }
+  }
 
   graphics.drawImage(
     "coach_bulldog",
@@ -314,6 +335,17 @@ void Walkin::render() {
   state->map->overlayer(-state->camera_x, -state->camera_y);
 
   lap_count_box->draw();
+
+  if (timing.since("walking_fade_in") <= 0.5) {
+    int x = (int) -1280 * 2 * timing.since("walking_fade_in");
+    int y = (int) 720.0 * 2 * timing.since("walking_fade_in");
+    graphics.drawImage("black_screen", x, y);
+  }
+
+  // if (timing.check("post_battle_grace") && timing.since("post_battle_grace") < 1.0) {
+  //   graphics.setColor("#ffffff", 1.0 - timing.since("post_battle_grace"));
+  //   graphics.drawImage("black_screen", 0, 0);
+  // }
 }
 
 Walkin::~Walkin() {

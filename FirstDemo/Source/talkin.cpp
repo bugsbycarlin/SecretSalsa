@@ -38,7 +38,11 @@ void Talkin::logic() {
     conversation->accept();
   }
 
-  if (conversation->finished()) {
+  if (conversation->finished() && !timing.check("conversation_fade_out")) {
+    timing.mark("conversation_fade_out");
+  }
+
+  if (timing.since("conversation_fade_out") > 0.5) {
     state->modes.push(new Walkin(state));
     state->modes.top()->initialize();
   }
@@ -62,6 +66,13 @@ void Talkin::render() {
   );
 
   conversation->draw();
+
+  if (conversation->finished()) {
+    //printf("I AM HERE %0.2f, %0.2f, %0.2f\n", timing.since("conversation_fade_out"), 1280 * (1.0 - timing.since("conversation_fade_out"), -720.0 + 720.0 * timing.since("conversation_fade_out"));
+    int x = (int) 1280 * (1.0 - 2 * timing.since("conversation_fade_out"));
+    int y = (int) -720.0 + 720.0 * 2 * timing.since("conversation_fade_out");
+    graphics.drawImage("black_screen", x, y);
+  }
 }
 
 Talkin::~Talkin() {

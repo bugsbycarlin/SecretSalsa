@@ -230,20 +230,22 @@ void Battlin::logic() {
     if (action_queue.size() > 0 && timing.since("done_selecting") > 0.2) {
       BattleCharacter* character = action_queue.front();
       action_queue.pop();
-      if (!character->player_character) {
-        if (character->hp > 0) {
-          // Do enemy behavior
-          enemy_queue.push(character);
+      if (character->hp > 0) {
+        if (!character->player_character) {
+          if (character->hp > 0) {
+            // Do enemy behavior
+            enemy_queue.push(character);
+          }
+        } else {
+          selection_character = character;
+          selection_character->action_state = "choosing";
+          mode = "selecting";
+          selection_1 = 0;
+          selection_2 = 0;
+          selection_row = 0;
+          selection_column = 0;
+          selection_state = 1;
         }
-      } else {
-        selection_character = character;
-        selection_character->action_state = "choosing";
-        mode = "selecting";
-        selection_1 = 0;
-        selection_2 = 0;
-        selection_row = 0;
-        selection_column = 0;
-        selection_state = 1;
       }
     }
 
@@ -350,21 +352,29 @@ void Battlin::chargeGauges() {
 void Battlin::handleSelection() {
   if (selection_state == 1) {
     if (input.keyPressed("down") > 0) {
+      sound.playSound("select_sound", 1);
       selection_1 += 1;
       if (selection_1 > selection_1_max) {
         selection_1 = 0;
       }
     } else if (input.keyPressed("up") > 0) {
+      sound.playSound("select_sound", 1);
       selection_1 -= 1;
       if (selection_1 < 0) {
         selection_1 = selection_1_max;
       }
     } else if (input.keyPressed("a") > 0) {
+      sound.playSound("accept_sound", 1);
       // choose the choice!
       if (selection_1 == 0) {
         //mode = "acting";
         //selection_character->action_state = "acting";
         selection_state = 2;
+        for (int i = 0; i < enemy_party.size() - 1; i++) {
+          if (enemy_party[selection_2]-> hp <= 0) {
+            selection_2 += 1;
+          }
+        }
       } else {
         mode = "charging";
         selection_character->ap = 0;
@@ -374,16 +384,19 @@ void Battlin::handleSelection() {
     }
   } else if (selection_state == 2) {
     if (input.keyPressed("down") > 0) {
+      sound.playSound("select_sound", 1);
       selection_2 += 1;
       if (selection_2 > enemy_party.size() - 1) {
         selection_2 = 0;
       }
     } else if (input.keyPressed("up") > 0) {
+      sound.playSound("select_sound", 1);
       selection_2 -= 1;
       if (selection_2 < 0) {
         selection_2 = enemy_party.size() - 1;
       }
     } else if (input.keyPressed("a") > 0) {
+      sound.playSound("accept_sound", 1);
       // choose the choice!
       mode = "acting";
       selection_character->target = enemy_party[selection_2];

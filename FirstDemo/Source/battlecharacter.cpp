@@ -79,6 +79,7 @@ void BattleCharacter::continueAttack() {
 
   if (effects.finished(unique_name + "_attack_move_x")) {
     //printf("Switching from attack_move to attack_hold\n");
+    sound.playSound(name + "_attack", 1);
     effects.remove(unique_name + "_attack_move_x");
     effects.remove(unique_name + "_attack_jump_y");
     effects.remove(unique_name + "_attack_move_y");

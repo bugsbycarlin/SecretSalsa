@@ -193,6 +193,7 @@ void Conversation::up() {
   if (!conversation_box->typewriterFinished()) {
     conversation_box->startTypewriter();
   } else if (current_element->type == "_choice") {
+    sound.playSound("select_sound", 1);
     choice_value -= 1;
     if (choice_value < 0) {
       choice_value = current_element->num_choices - 1;
@@ -204,6 +205,7 @@ void Conversation::down() {
   if (!conversation_box->typewriterFinished()) {
     conversation_box->finishTypewriter();
   } else if (current_element->type == "_choice") {
+    sound.playSound("select_sound", 1);
     choice_value += 1;
     if (choice_value > current_element->num_choices - 1) {
       choice_value = 0;
@@ -217,10 +219,16 @@ void Conversation::accept() {
     return;
   }
 
-  if (finished()) return;
+  if (finished()) {
+    return;
+  }
 
   if (current_element->type == "_choice") {
+    sound.playSound("accept_sound", 1);
     state->values["music_choice"] = choice_value;
+    current_element = NULL;
+    conversation_position = {};
+    return;
   }
 
   if (current_element->children.size() > 0) {
@@ -241,7 +249,9 @@ void Conversation::accept() {
     }
   }
 
-  setMenus();
+  if (current_element != NULL) {
+    setMenus();
+  }
 }
 
 bool Conversation::finished() {
@@ -268,6 +278,8 @@ void Conversation::setMenus() {
 }
 
 void Conversation::draw() {
+  if (finished() && current_element == NULL) return;
+
   character_box->draw();
   conversation_box->draw();
   graphics.setColor("#ffffff", 1.0);
@@ -281,6 +293,7 @@ void Conversation::draw() {
     );
   }
 
+  graphics.setColor("#ffffff", 1.0);
   if (current_element->name != "" 
     && character_images.count(current_element->name) == 1
     && graphics.checkImage(character_images[current_element->name])) {
