@@ -9,6 +9,10 @@
 using namespace std;
 using namespace Honey;
 
+// Simple Debug Print
+void db(int x) {
+  printf("Here %d\n", x);
+}
 
 Battlin::Battlin(State* state, vector<WalkingCharacter*> player_party, vector<WalkingCharacter*> enemy_party) {
   this->state = state;
@@ -121,7 +125,6 @@ void Battlin::initializeMenus() {
     hot_config.getString("menu", "battle_header_font_color")
   );
   string s = printLine({"Name", "HP", "SP", "Charge"}, {11, 8, 6, 20});
-  printf("Here: %s---\n", s.c_str());
   header->setTextLines({s});
 
   info_card = new Menu(
@@ -183,7 +186,6 @@ void Battlin::initializeMenus() {
 
 void Battlin::logic() {
   //printf("Mode is %s\n", mode.c_str());
-
   if (mode == "prep") {
     if (!timing.check("music_down")) timing.mark("music_down");
     if (hot_config.getBool("music", "switch_music_for_battle")) {
@@ -196,9 +198,9 @@ void Battlin::logic() {
       }
     }
 
-    everybodyGetInPlace(); // mode might change to charging
+    everybodyGetInPlace(); // mode might change to action
 
-    if (mode == "charging") { // it was just switched
+    if (mode == "action") { // it was just switched
       if (hot_config.getBool("music", "switch_music_for_battle")) {
         sound.stopMusic();
         sound.playMusic("battle_fanfare", -1);
@@ -211,77 +213,55 @@ void Battlin::logic() {
     }
   }
 
-  if (mode == "acting") {
-    // For now
-    selection_character->continueAttack();
-    if (selection_character->action_state == "waiting") {
+  if (mode == "action") {
+    if (selection_character != NULL && selection_character->hp <= 0) {
       selection_character = NULL;
+      timing.mark("done_selecting");
+    }
+
+    // if (selection_character != NULL && selection_character->action_state != "choosing") {
+    //   selection_character = NULL;
+    // }
+
+    for (BattleCharacter* character : everyone) {
+      if (character->action_state == "acting") {
+        character->continueAttack();
+      }
+    }
+
+    for (BattleCharacter* character : everyone) {
+      if (character->hp <= 0) {
+        character->action_state = "ko";
+      }
+    }
+
+    chargeGauges();
+
+    for (BattleCharacter* character : everyone) {
+      if (character->action_state == "ready" && character->hp > 0) {
+        if (!character->player_character) {
+          character->startAutomaticBattle(player_party);
+        } else {
+          character->action_state = "waiting";
+          action_queue.push(character);
+        }
+      }
+    }
+
+    if (selection_character == NULL && action_queue.size() > 0 && timing.since("done_selecting") > 0.1) {
+      selection_character = action_queue.front();
+      action_queue.pop();
+      selection_character->action_state = "choosing";
       selection_1 = 0;
       selection_2 = 0;
       selection_row = 0;
       selection_column = 0;
       selection_state = 1;
-      mode = "charging";
+      selection_card_1->setTextLines({"Attack", selection_character->skill, "Move", "Item"});
     }
   }
 
-  if (mode == "charging" || mode == "selecting" || mode == "acting") {
-    chargeGauges();
-    
-    // if (input.keyPressed("b") > 0) {
-    //   for (Character* character : root_enemy_party) {
-    //     character->hp = 0;
-    //   }
-
-    //   // TO DO: delete this tired old mode
-    //   state->modes.pop();
-    // }
-  }
-
-  if (mode == "charging" && acting_enemy == NULL) {
-    if (action_queue.size() > 0 && timing.since("done_selecting") > 0.2) {
-      BattleCharacter* character = action_queue.front();
-      action_queue.pop();
-      if (character->hp > 0) {
-        if (!character->player_character) {
-          if (character->hp > 0) {
-            // Do enemy behavior
-            enemy_queue.push(character);
-          }
-        } else {
-          selection_character = character;
-          selection_character->action_state = "choosing";
-          mode = "selecting";
-          selection_1 = 0;
-          selection_2 = 0;
-          selection_row = 0;
-          selection_column = 0;
-          selection_state = 1;
-          selection_card_1->setTextLines({"Attack", selection_character->skill, "Move", "Item"});
-        }
-      }
-    }
-
-    if (enemy_queue.size() > 0 && acting_enemy == NULL && mode != "selecting") {
-      acting_enemy = enemy_queue.front();
-      enemy_queue.pop();
-      if (acting_enemy-> hp > 0) {
-        acting_enemy->startAutomaticBattle(player_party);
-      } else {
-        acting_enemy = NULL;
-      }
-    }
-  }
-
-  if (acting_enemy != NULL)  {
-    acting_enemy->continueAttack();
-  }
-
-  if (acting_enemy != NULL && acting_enemy->action_state == "waiting") {
-    acting_enemy = NULL;
-  }
-
-  if (mode == "selecting") {
+  if (selection_character != NULL) {
     handleSelection();
   }
 
@@ -345,7 +325,7 @@ void Battlin::everybodyGetInPlace() {
       for (BattleCharacter* character : everyone) {
         character->ap = 0;
       }
-      mode = "charging";
+      mode = "action";
     }
 }
 
@@ -354,7 +334,7 @@ void Battlin::chargeGauges() {
       timing.mark("ap_delay");
     } else if (timing.since("ap_delay") > ap_delay) {
       for (BattleCharacter* character : everyone) {
-        if (character->action_state == "waiting" && character->hp > 0) {
+        if (character->action_state == "charging" && character->hp > 0) {
           character->ap += character->ap_rate;
 
           // If a character is facing the wrong way, when the gauge is charged, turn around and reset the gauge.
@@ -366,7 +346,6 @@ void Battlin::chargeGauges() {
           if (character->ap >= character->max_ap) {
             character->ap = character->max_ap;
             character->action_state = "ready";
-            action_queue.push(character);
           }
         }
       }
@@ -392,8 +371,6 @@ void Battlin::handleSelection() {
       sound.playSound("accept_sound", 1);
       // choose the choice!
       if (selection_1 == 0) {
-        //mode = "acting";
-        //selection_character->action_state = "acting";
         selection_state = 2;
         for (int i = 0; i < enemy_party.size() - 1; i++) {
           if (enemy_party[selection_2]-> hp <= 0) {
@@ -401,9 +378,8 @@ void Battlin::handleSelection() {
           }
         }
       } else {
-        mode = "charging";
         selection_character->ap = 0;
-        selection_character->action_state = "waiting";
+        selection_character->action_state = "charging";
         timing.mark("done_selecting");
       }
     }
@@ -423,9 +399,9 @@ void Battlin::handleSelection() {
     } else if (input.keyPressed("a") > 0) {
       sound.playSound("accept_sound", 1);
       // choose the choice!
-      mode = "acting";
       selection_character->target = enemy_party[selection_2];
       selection_character->startAttack();
+      selection_character = NULL;
     }
   }
 }
@@ -439,44 +415,31 @@ void Battlin::render() {
     }
   }
 
-  if (mode == "charging" || mode == "selecting" || mode == "acting" || mode == "finished") {
+  if (mode == "action" || mode == "finished") {
+    // This should be sorted by y value
     for (BattleCharacter* character : everyone) {
-      if (character != acting_enemy && character != selection_character) {
-        character->drawActiveMode();
+      character->drawActiveMode();
+      if (effects.busy(character->unique_name + "_attack_hold_move")) {
+        if (character->damage_value >= 0) {
+          damage_text->setText(to_string(character->damage_value));
+        } else {
+          damage_text->setText("Miss");
+        }
+        damage_text->draw({character->target->battle_home_x - character->target->direction * 50, character->target->battle_home_y + character->target->margin_y});
       }
     }
-    // draw the action character last so the actions are on top
-    if (selection_character != NULL) {
-      selection_character->drawActiveMode();
-      if (effects.busy(selection_character->unique_name + "_attack_hold_move")) {
-        damage_text->setText(to_string(selection_character->damage_value));
-        damage_text->draw({selection_character->target->battle_x - selection_character->target->direction * 50, selection_character->target->battle_y + selection_character->target->margin_y});
-      }
-    }
-    if (acting_enemy != NULL) {
-      acting_enemy->drawActiveMode();
-      if (effects.busy(acting_enemy->unique_name + "_attack_hold_move")) {
-        damage_text->setText(to_string(acting_enemy->damage_value));
-        damage_text->draw({acting_enemy->target->battle_x - acting_enemy->target->direction * 50, acting_enemy->target->battle_y + acting_enemy->target->margin_y});
-      }
-    }
-
   }
 
-  if (mode == "charging" || mode == "selecting" || mode == "acting") {
+  if (mode == "action") {
     drawInfoCard();
   }
 
-  if (mode == "selecting") {
+  if (selection_character != NULL) {
     drawSelection();
   }
 
   state->map->overlayer(-state->camera_x, -state->camera_y);
 
-  bool player_defeated = true;
-  for (BattleCharacter* character : player_party) {
-    if (character->hp > 0) player_defeated = false;
-  }
   if (mode == "finished") {
     black_screen->draw();
   }
@@ -503,22 +466,46 @@ void Battlin::drawInfoCard() {
   graphics.setColor("#FFFFFF", 1.0);
   int count = 0;
   for (BattleCharacter* character : player_party) {
-    graphics.drawImage(
-      "charge_gauge_outline",
-      hot_config.getInt("menu", "battle_gauge_outline_x"),
-      hot_config.getInt("menu", "battle_gauge_outline_y") + hot_config.getInt("menu", "battle_gauge_spacing") * count,
-      true, 0, 1
-    );
+    if (character->hp > 0) {
+      graphics.drawImage(
+        "charge_gauge_outline",
+        hot_config.getInt("menu", "battle_gauge_outline_x"),
+        hot_config.getInt("menu", "battle_gauge_outline_y") + hot_config.getInt("menu", "battle_gauge_spacing") * count,
+        true, 0, 1
+      );
 
-    string fill_color = "orange";
-    if (character->ap == character->max_ap) fill_color = "green";
-    graphics.drawImage(
-      "charge_gauge_" + fill_color + "_fill",
-      hot_config.getInt("menu", "battle_gauge_outline_x") + hot_config.getInt("menu", "battle_gauge_fill_margin_x"),
-      hot_config.getInt("menu", "battle_gauge_outline_y") + hot_config.getInt("menu", "battle_gauge_fill_margin_y") + hot_config.getInt("menu", "battle_gauge_spacing") * count,
-      true, 0, character->ap / character->max_ap, 1, 1
-    );
+      string fill_color = "orange";
+      if (character->ap == character->max_ap) fill_color = "green";
+      graphics.drawImage(
+        "charge_gauge_" + fill_color + "_fill",
+        hot_config.getInt("menu", "battle_gauge_outline_x") + hot_config.getInt("menu", "battle_gauge_fill_margin_x"),
+        hot_config.getInt("menu", "battle_gauge_outline_y") + hot_config.getInt("menu", "battle_gauge_fill_margin_y") + hot_config.getInt("menu", "battle_gauge_spacing") * count,
+        true, 0, character->ap / character->max_ap, 1, 1
+      );
+    }
     count++;
+  }
+
+  // Draw the gauge outlines for enemies
+  graphics.setColor("#FFFFFF", 1.0);
+  for (BattleCharacter* character : enemy_party) {
+    if (character->hp > 0 && character->action_state == "charging") {
+      graphics.drawImage(
+        "charge_gauge_outline",
+        character->battle_home_x,
+        character->battle_home_y,
+        true, 0, 1
+      );
+
+      string fill_color = "orange";
+      if (character->ap == character->max_ap) fill_color = "green";
+      graphics.drawImage(
+        "charge_gauge_" + fill_color + "_fill",
+        character->battle_home_x + hot_config.getInt("menu", "battle_gauge_fill_margin_x"),
+        character->battle_home_y + hot_config.getInt("menu", "battle_gauge_fill_margin_y"),
+        true, 0, character->ap / character->max_ap, 1, 1
+      );
+    }
   }
 }
 

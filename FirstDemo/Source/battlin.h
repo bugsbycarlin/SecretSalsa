@@ -44,7 +44,7 @@ class Battlin : public Mode {
 
   float ap_delay;
 
-  string mode; // prep, charging, selecting, acting, finished
+  string mode; // prep, action, finished
 
   int good_direction;
 

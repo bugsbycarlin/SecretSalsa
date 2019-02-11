@@ -46,9 +46,9 @@
 </section>
 
 <section name="game">
-  <param type="string" name="starting_screen">talking</param>
+  <param type="string" name="starting_screen">walking</param>
 
-  <param type="int" name="tune_bear_hp">1</param>
+  <param type="int" name="tune_bear_hp">127</param>
   <param type="string" name="tune_bear_display_name">Tune Bear</param>
   <param type="float" name="tune_bear_ap_rate">1.8</param>
   <param type="int" name="tune_bear_defense">13</param>
@@ -56,7 +56,7 @@
   <param type="int" name="tune_bear_attack_max">55</param>
   <param type="string" name="tune_bear_skill">Tapes</param>
 
-  <param type="int" name="witchycat_hp">1</param>
+  <param type="int" name="witchycat_hp">109</param>
   <param type="string" name="witchycat_display_name">Witchycat</param>
   <param type="float" name="witchycat_ap_rate">1.8</param>
   <param type="int" name="witchycat_defense">10</param>
@@ -64,7 +64,7 @@
   <param type="int" name="witchycat_attack_max">39</param>
   <param type="string" name="witchycat_skill">Magic</param>
   
-  <param type="int" name="robin_hp">8</param>
+  <param type="int" name="robin_hp">83</param>
   <param type="string" name="robin_display_name">Robin</param>
   <param type="float" name="robin_ap_rate">2.4</param>
   <param type="int" name="robin_defense">8</param>
@@ -87,11 +87,11 @@
   <param type="float" name="ap_delay">0.05</param>
 
   <param type="float" name="default_battle_jump_time">0.5</param>
-  <param type="float" name="default_battle_hold_time">0.1</param>
+  <param type="float" name="default_battle_hold_time">0.2</param>
   <param type="float" name="battle_finish_time">1.5</param>
 
   <param type="float" name="bigdog_battle_jump_time">0.4</param>
-  <param type="float" name="bigdog_battle_hold_time">0.08</param>
+  <param type="float" name="bigdog_battle_hold_time">0.15</param>
 </section>
 
 <section name="menu">

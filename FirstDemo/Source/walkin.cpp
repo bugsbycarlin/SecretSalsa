@@ -9,10 +9,7 @@
 using namespace std;
 using namespace Honey;
 
-// Simple Debug Print
-void db(int x) {
-  printf("Here %d\n", x);
-}
+
 
 Walkin::Walkin(State* state) {
   this->state = state;

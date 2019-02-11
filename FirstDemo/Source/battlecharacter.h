@@ -53,7 +53,7 @@ class BattleCharacter : public Character {
   float attack_jump_time;
   float attack_hold_time;
 
-  string action_state; // waiting, ready, choosing, acting
+  string action_state; // charging, ready, waiting, choosing, acting, ko
 
   bool player_character;
 

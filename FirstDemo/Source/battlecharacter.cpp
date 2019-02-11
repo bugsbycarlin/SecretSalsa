@@ -10,7 +10,7 @@ using namespace std;
 using namespace Honey;
 
 BattleCharacter::BattleCharacter(State* state) : Character(state) {
-  action_state = "waiting";
+  action_state = "charging";
   target = NULL;
   damage_value = 0;
 
@@ -86,11 +86,17 @@ void BattleCharacter::continueAttack() {
     effects.makeTween(unique_name + "_attack_hold_move", 0, 0, attack_hold_time);
     effects.start(unique_name + "_attack_hold_move");
 
-    damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
-    if (damage_value < 1) damage_value = 1;
-    target->hp -= damage_value;
-    if (target->hp < 0) {
-      target->hp = 0;
+    // TODO dodge here
+    if (target->battle_x == target->battle_home_x && target->battle_y == target->battle_home_y) {
+      damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
+      if (damage_value < 1) damage_value = 1;
+      target->hp -= damage_value;
+      if (target->hp < 0) {
+        target->hp = 0;
+      }
+    } else {
+      // MISS!
+      damage_value = -1;
     }
   }
 
@@ -114,7 +120,7 @@ void BattleCharacter::continueAttack() {
     effects.remove(unique_name + "_attack_return_y");
     battle_x = battle_home_x;
     battle_y = battle_home_y;
-    action_state = "waiting";
+    action_state = "charging";
     ap = 0;
   }
 }
@@ -154,7 +160,7 @@ void BattleCharacter::drawActiveMode() {
       setAnimation("attacking");
     }
   }
-  if (hp <= 0) {
+  if (action_state != "acting" && hp <= 0) {
     if (animations.count("ko") == 1) {
       setAnimation("ko");
     } else {
@@ -174,6 +180,7 @@ void BattleCharacter::drawActiveMode() {
     }
   }
 
+  graphics.setColor("#FFFFFF", 1.0);
   graphics.drawImage(
     animations[current_animation][current_frame],
     battle_x + margin_x,
