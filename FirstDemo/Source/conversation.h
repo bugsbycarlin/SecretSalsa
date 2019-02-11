@@ -75,6 +75,7 @@ class Conversation {
   stack<int> conversation_position;
 
   map<string, string> character_images;
+  map<string, string> character_speech;
 
   State* state;
 

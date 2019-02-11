@@ -79,7 +79,6 @@ void BattleCharacter::continueAttack() {
 
   if (effects.finished(unique_name + "_attack_move_x")) {
     //printf("Switching from attack_move to attack_hold\n");
-    sound.playSound(name + "_attack", 1);
     effects.remove(unique_name + "_attack_move_x");
     effects.remove(unique_name + "_attack_jump_y");
     effects.remove(unique_name + "_attack_move_y");
@@ -88,6 +87,7 @@ void BattleCharacter::continueAttack() {
 
     // TODO dodge here
     if (target->battle_x == target->battle_home_x && target->battle_y == target->battle_home_y) {
+      sound.playSound(name + "_attack", 1);
       damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
       if (damage_value < 1) damage_value = 1;
       target->hp -= damage_value;
@@ -97,6 +97,7 @@ void BattleCharacter::continueAttack() {
     } else {
       // MISS!
       damage_value = -1;
+      sound.playSound("miss", 1);
     }
   }
 

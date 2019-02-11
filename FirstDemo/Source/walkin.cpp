@@ -29,6 +29,7 @@ void Walkin::initializeWalkingParty() {
     party->add(character);
   }
 
+  sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
   if (state->string_values.count("music_choice") != 1) {
     printf("No music chosen.\n");
     state->string_values["music_choice"] = state->getString("music_" + to_string(math_utils.randomInt(0,4)));

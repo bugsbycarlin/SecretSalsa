@@ -28,6 +28,8 @@ void Talkin::initialize() {
   conversation->loadConversations("Scripts/first_demo_conversations.txt");
   printf("Here 1\n");
   conversation->setCurrentConversation("training_introduction");
+  sound.stopMusic();
+  sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
 }
 
 void Talkin::logic() {
@@ -41,6 +43,9 @@ void Talkin::logic() {
 
   if (conversation->finished && !timing.check("conversation_fade_out")) {
     timing.mark("conversation_fade_out");
+    if (conversation->finish_value == "fade") {
+      sound.playMusic("game_over", 1);
+    }
   }
 
   if (timing.since("conversation_fade_out") > 0.5 && conversation->finished) {

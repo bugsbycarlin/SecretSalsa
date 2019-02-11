@@ -73,6 +73,7 @@ Conversation::Conversation(State* state) {
 void Conversation::loadConversations(string conversation_filepath) {
   std::smatch matches;
   regex r_character_image("_character_image ([^,]+), ([A-Za-z0-9_]*)");
+  regex r_character_speech("_character_speech ([^,]+), ([A-Za-z0-9_]*)");
   regex r_conversation("_conversation ([^\n]*)");
   regex r_speech("([ ]*)_speech ([^:]+): ([^\n]*)");
   regex r_choice("([ ]*)_choice ([^:]+): ([^\n]*)");
@@ -93,6 +94,8 @@ void Conversation::loadConversations(string conversation_filepath) {
   while (getline(input_file, line)) {
     if (regex_match(line, matches, r_character_image)) {
       character_images[matches[1].str()] = matches[2].str();
+    } if (regex_match(line, matches, r_character_speech)) {
+      character_speech[matches[1].str()] = matches[2].str();
     } else if (regex_match(line, matches, r_conversation)) {
       load_current_convo = matches[1].str();
       ConversationElement* element = new ConversationElement();
@@ -361,6 +364,13 @@ void Conversation::setMenus() {
       lines.push_back(element->text);
     }
     choice_box->setTextLines(lines);
+  }
+
+  if (current_element->type == "_speech" || (current_element->type == "_choice" && current_element->name != "")) {
+    int speech_number = math_utils.randomInt(1,3);
+    printf("Speech number is %d\n", speech_number);
+    sound.stopSound();
+    sound.playSound(character_speech[current_element->name] + "_" + to_string(speech_number), 1);
   }
 }
 

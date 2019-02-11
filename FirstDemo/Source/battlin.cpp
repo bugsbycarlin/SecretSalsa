@@ -103,6 +103,12 @@ void Battlin::initializeCharacters() {
     everyone.push_back(bc);
     j += 1;
   }
+
+  for (BattleCharacter* character : everyone) {
+    if (character->hp <= 0 && character->action_state != "ko") {
+      character->action_state = "ko";
+    }
+  }
 }
 
 void Battlin::initializeMenus() {
@@ -230,17 +236,31 @@ void Battlin::logic() {
     }
 
     for (BattleCharacter* character : everyone) {
-      if (character->hp <= 0) {
+      if (character->hp <= 0 && character->action_state != "ko") {
         character->action_state = "ko";
+        sound.playSound(hot_config.getString("game", character->name + "_ko_sound"), 1);
       }
     }
 
     chargeGauges();
 
+    bool someone_acting = false;
+    for (BattleCharacter* character : everyone) {
+      if (character->action_state == "acting") {
+        someone_acting = true;
+      }
+    }
+    bool enemy_free_to_act = true;
+    if (hot_config.getString("game", "battle_pace") == "one" && someone_acting) {
+      enemy_free_to_act = false;
+    }
+
     for (BattleCharacter* character : everyone) {
       if (character->action_state == "ready" && character->hp > 0) {
         if (!character->player_character) {
-          character->startAutomaticBattle(player_party);
+          if (enemy_free_to_act) {
+            character->startAutomaticBattle(player_party);
+          }
         } else {
           character->action_state = "waiting";
           action_queue.push(character);
@@ -281,7 +301,7 @@ void Battlin::logic() {
     timing.mark("music_down");
   }
 
-  if (hot_config.getBool("music", "switch_music_for_battle")) {
+  if (hot_config.getBool("music", "switch_music_for_battle") || player_defeated) {
     if (mode == "finished" && timing.check("music_down")) {
       if (timing.since("music_down") < 1) {
         float volume = 1.0;

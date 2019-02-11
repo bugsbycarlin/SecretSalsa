@@ -1,6 +1,8 @@
 
 _character_image Coach Bulldog, coach_bulldog_profile
 _character_image Tune Bear, tune_bear_profile
+_character_speech Coach Bulldog, coach_bulldog_speech
+_character_speech Tune Bear, tune_bear_speech
 
 _conversation training_introduction
   _speech Coach Bulldog: Welcome to the DOG HOUSE! Let me break it down.

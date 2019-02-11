@@ -94,7 +94,8 @@ void Game::initialize() {
     "sangue_su_callisto",
     "piano",
     "fog_burning_dawn",
-    "battle_fanfare"
+    "battle_fanfare",
+    "game_over"
   });
 
   sound.addSounds("Sound/", {
@@ -105,7 +106,14 @@ void Game::initialize() {
     "tune_bear_attack",
     "robin_attack",
     "witchycat_attack",
-    "thunder"
+    "miss",
+    "thunder",
+    "ko_1",
+    "ko_2",
+    "coach_bulldog_speech_1",
+    "coach_bulldog_speech_2",
+    "tune_bear_speech_1",
+    "tune_bear_speech_2",
   });
 
   state->music["galapaghost"] = "crepuscolo_su_saturno";
@@ -113,6 +121,13 @@ void Game::initialize() {
   state->music["the_vicious_venues"] = "sangue_su_callisto";
   state->music["wimpsteed"] = "piano";
   state->music["the_books"] = "fog_burning_dawn";
+
+  // For random picking
+  state->storeString("music_0", "galapaghost");
+  state->storeString("music_1", "super_brute_brothers");
+  state->storeString("music_2", "the_vicious_venues");
+  state->storeString("music_3", "wimpsteed");
+  state->storeString("music_4", "the_books");
 
   sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
 
