@@ -31,6 +31,9 @@ class State {
   void store(string label, int value);
   int get(string label);
 
+  void storeString(string label, string value);
+  string getString(string label);
+
   ~State();
 
   stack<Mode*> modes;
@@ -48,7 +51,9 @@ class State {
   const float camera_blend_factor = 0.2;
 
   std::map<string, int> values;
-  std::map<int, string> music;
+  std::map<string, string> string_values;
+  
+  std::map<string, string> music;
 
   vector<PermanentCharacter*> party;
 

@@ -93,6 +93,8 @@ void Character::cloneFromPermanentCharacter(PermanentCharacter* character) {
   attack_max = character->attack_max;
 
   permanent_character = character;
+
+  skill = character->skill;
 }
 
 Character::~Character() {

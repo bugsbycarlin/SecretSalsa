@@ -23,6 +23,7 @@ void Talkin::initialize() {
   state->camera_x = hot_config.getInt("layout", "conversation_camera_x");;
   state->camera_y = hot_config.getInt("layout", "conversation_camera_y");;
 
+  timing.remove("conversation_fade_out");
   conversation = new Conversation(state);
   conversation->loadConversations("Scripts/first_demo_conversations.txt");
   printf("Here 1\n");
@@ -38,13 +39,15 @@ void Talkin::logic() {
     conversation->accept();
   }
 
-  if (conversation->finished() && !timing.check("conversation_fade_out")) {
+  if (conversation->finished && !timing.check("conversation_fade_out")) {
     timing.mark("conversation_fade_out");
   }
 
-  if (timing.since("conversation_fade_out") > 0.5) {
-    state->modes.push(new Walkin(state));
-    state->modes.top()->initialize();
+  if (timing.since("conversation_fade_out") > 0.5 && conversation->finished) {
+    if (conversation->finish_value == "walking") {
+      state->modes.push(new Walkin(state));
+      state->modes.top()->initialize();
+    }
   }
 }
 
@@ -62,16 +65,19 @@ void Talkin::render() {
     "tune_bear",
     tune_bear_x - state->camera_x,
     tune_bear_y - state->camera_y,
-    true, 0, 1
+    true, 0, -1, 1, 1
   );
 
   conversation->draw();
 
-  if (conversation->finished()) {
+  if (conversation->finished && conversation->finish_value == "walking") {
     //printf("I AM HERE %0.2f, %0.2f, %0.2f\n", timing.since("conversation_fade_out"), 1280 * (1.0 - timing.since("conversation_fade_out"), -720.0 + 720.0 * timing.since("conversation_fade_out"));
     int x = (int) 1280 * (1.0 - 2 * timing.since("conversation_fade_out"));
     int y = (int) -720.0 + 720.0 * 2 * timing.since("conversation_fade_out");
     graphics.drawImage("black_screen", x, y);
+  } else if (conversation->finished && conversation->finish_value == "fade") {
+    graphics.setColor("#FFFFFF", timing.since("conversation_fade_out"));
+    graphics.drawImage("black_screen", 0, 0);
   }
 }
 

@@ -13,9 +13,12 @@
 #include "mode.h"
 #include "walkingcharacter.h"
 #include "battlecharacter.h"
+#include "talkin.h"
 
 using namespace Honey;
 using namespace std;
+
+class Talkin;
 
 class Battlin : public Mode {
  public:

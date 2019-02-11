@@ -186,16 +186,28 @@ void Battlin::logic() {
 
   if (mode == "prep") {
     if (!timing.check("music_down")) timing.mark("music_down");
-    if (timing.since("music_down") < 1) {
-      sound.setMusicVolume(1.0 - timing.since("music_down"));
+    if (hot_config.getBool("music", "switch_music_for_battle")) {
+      if (timing.since("music_down") < 1) {
+        float volume = 1.0;
+        if (volume > hot_config.getFloat("music", "music_volume")) {
+          volume = hot_config.getFloat("music", "music_volume");
+        }
+        sound.setMusicVolume(volume - timing.since("music_down"));
+      }
     }
 
     everybodyGetInPlace(); // mode might change to charging
 
     if (mode == "charging") { // it was just switched
-      sound.stopMusic();
-      sound.playMusic("battle_fanfare", -1);
-      sound.setMusicVolume(1.0);
+      if (hot_config.getBool("music", "switch_music_for_battle")) {
+        sound.stopMusic();
+        sound.playMusic("battle_fanfare", -1);
+        float volume = 1.0;
+        if (volume > hot_config.getFloat("music", "music_volume")) {
+          volume = hot_config.getFloat("music", "music_volume");
+        }
+        sound.setMusicVolume(volume);
+      }
     }
   }
 
@@ -245,6 +257,7 @@ void Battlin::logic() {
           selection_row = 0;
           selection_column = 0;
           selection_state = 1;
+          selection_card_1->setTextLines({"Attack", selection_character->skill, "Move", "Item"});
         }
       }
     }
@@ -288,9 +301,15 @@ void Battlin::logic() {
     timing.mark("music_down");
   }
 
-  if (mode == "finished" && timing.check("music_down")) {
-    if (timing.since("music_down") < 1) {
-      sound.setMusicVolume(1.0 - timing.since("music_down"));
+  if (hot_config.getBool("music", "switch_music_for_battle")) {
+    if (mode == "finished" && timing.check("music_down")) {
+      if (timing.since("music_down") < 1) {
+        float volume = 1.0;
+        if (volume > hot_config.getFloat("music", "music_volume")) {
+          volume = hot_config.getFloat("music", "music_volume");
+        }
+        sound.setMusicVolume(volume - timing.since("music_down"));
+      }
     }
   }
 
@@ -302,6 +321,12 @@ void Battlin::logic() {
       }
       // Get out of battle
       state->modes.pop();
+    } else {
+      state->modes = {}; // huge leak
+      Talkin* x = new Talkin(state);
+      state->modes.push(x);
+      x->initialize();
+      x->conversation->setCurrentConversation("training_failure");
     }
   }
 }

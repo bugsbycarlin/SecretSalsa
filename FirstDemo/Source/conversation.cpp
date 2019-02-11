@@ -65,6 +65,9 @@ Conversation::Conversation(State* state) {
     hot_config.getInt("menu", "choice_font_size"),
     hot_config.getString("menu", "choice_font_color")
   );
+
+  finished = false;
+  finish_value = "";
 }
 
 void Conversation::loadConversations(string conversation_filepath) {
@@ -74,119 +77,167 @@ void Conversation::loadConversations(string conversation_filepath) {
   regex r_speech("([ ]*)_speech ([^:]+): ([^\n]*)");
   regex r_choice("([ ]*)_choice ([^:]+): ([^\n]*)");
   regex r_choice_value("([ ]*)_choice_value ([^\n]*)");
+  regex r_action("([ ]*)_action ([^\n]*)");
+  regex r_next("([ ]*)_next ([^\n]*)");
+  regex r_finish("([ ]*)_finish ([^\n]*)");
 
   std::ifstream input_file(conversation_filepath);
 
   string load_current_convo = "";
-  //stack<vector<ConversationElement*>*> sub_convos;
-  current_indentation = 0;
+
+  int last_indentation = 0;
   ConversationElement* last_element;
 
   string line;
   int line_count = 0;
   while (getline(input_file, line)) {
-    //printf("Read line %s\n", line.c_str());
     if (regex_match(line, matches, r_character_image)) {
       character_images[matches[1].str()] = matches[2].str();
     } else if (regex_match(line, matches, r_conversation)) {
-      //printf("Matched _conversation\n");
-      //printf("Name is %s\n", matches[1].str().c_str());
       load_current_convo = matches[1].str();
-      conversations[load_current_convo] = {};
-      sub_conversation.empty();
-      sub_conversation.push(&conversations[load_current_convo]);
-      current_indentation = 2;
+      ConversationElement* element = new ConversationElement();
+      element->type = "_root";
+      element->text = load_current_convo;
+      element->parent = NULL;
+      conversation_trees[load_current_convo] = element;
+      last_indentation = 0;
+      last_element = element;
     } else if (regex_match(line, matches, r_speech)) {
-      ConversationElement* element = new ConversationElement();
-      // printf("_speech\n");
-      // printf("Indentation is %lu\n", matches[1].str().size());
-      // printf("Name is %s\n", matches[2].str().c_str());
-      // printf("Speech is %s\n", matches[3].str().c_str());
-      handleIndentation(matches[1].str().size(), line_count);
-      element->type = "_speech";
-      element->name = matches[2].str();
-      element->text = matches[3].str();
-      sub_conversation.top()->push_back(element);
-      last_element = element;
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_speech";
+      new_element->name = matches[2].str();
+      new_element->text = matches[3].str();
+      int new_indentation = matches[1].str().size();
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
     } else if (regex_match(line, matches, r_choice)) {
-      ConversationElement* element = new ConversationElement();
-      // printf("_speech\n");
-      // printf("Indentation is %lu\n", matches[1].str().size());
-      // printf("Name is %s\n", matches[2].str().c_str());
-      // printf("Speech is %s\n", matches[3].str().c_str());
-      handleIndentation(matches[1].str().size(), line_count);
-      element->type = "_choice";
-      element->name = matches[2].str();
-      element->text = matches[3].str();
-      sub_conversation.top()->push_back(element);
-      last_element = element;
-    } else if (regex_match(line, matches, r_choice)) {
-      ConversationElement* element = new ConversationElement();
-      // printf("_speech\n");
-      // printf("Indentation is %lu\n", matches[1].str().size());
-      // printf("Name is %s\n", matches[2].str().c_str());
-      // printf("Speech is %s\n", matches[3].str().c_str());
-      handleIndentation(matches[1].str().size(), line_count);
-      element->type = "_choice";
-      element->name = matches[2].str();
-      element->text = matches[3].str();
-      sub_conversation.top()->push_back(element);
-      last_element = element;
-      last_element->choices = {};
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_choice";
+      new_element->name = matches[2].str();
+      new_element->text = matches[3].str();
+      int new_indentation = matches[1].str().size();
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
     } else if (regex_match(line, matches, r_choice_value)) {
-      ConversationElement* element = new ConversationElement();
-      // printf("_speech\n");
-      // printf("Indentation is %lu\n", matches[1].str().size());
-      // printf("Name is %s\n", matches[2].str().c_str());
-      // printf("Speech is %s\n", matches[3].str().c_str());
-      if (matches[1].str().size() != current_indentation + 2) {
-        printf("Syntax error on line %d! _choice_value must be 2 spaces in from previous _choice", line_count);
-        exit(1);
-      }
-      element->type = "_choice_value";
-      element->text = matches[2].str();
-      last_element->choices.push_back(element);
-      last_element->num_choices += 1;
-    }
-    // printf("The size of the main list is %lu\n", conversations[load_current_convo].size());
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_choice_value";
+      new_element->text = matches[2].str();
+      int new_indentation = matches[1].str().size();
+      // if (new_indentation != last_indentation + 2) {
+      //   printf("Syntax error on line %d! _choice_value must be 2 spaces in from previous _choice\n", line_count);
+      //   printf("%s\n", line.c_str());
+      //   exit(1);
+      // }
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
+    } else if (regex_match(line, matches, r_action)) {
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_action";
+      new_element->text = matches[2].str();
+      int new_indentation = matches[1].str().size();
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
+    } else if (regex_match(line, matches, r_next)) {
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_next";
+      new_element->text = matches[2].str();
+      int new_indentation = matches[1].str().size();
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
+    } else if (regex_match(line, matches, r_finish)) {
+      ConversationElement* new_element = new ConversationElement();
+      new_element->type = "_finish";
+      new_element->text = matches[2].str();
+      int new_indentation = matches[1].str().size();
+      checkAndAdd(line, line_count, last_indentation, new_indentation, new_element, last_element);
+      last_element = new_element;
+      last_indentation = new_indentation;
+    } 
     line_count++;
+  }
+
+  printf("Here I am, dawg\n");
+  for (pair<string, ConversationElement*> convo : conversation_trees) {
+    string key = (string) convo.first;
+    printf("The conversation in question is called %s\n", key.c_str());
+
+    ConversationElement* element = convo.second;
+    walk(element, 0);
   }
 }
 
-void Conversation::handleIndentation(int new_indentation, int line_count) {
+void Conversation::walk(ConversationElement* element, int indentation) {
+  string indentation_string(indentation, ' ');
+  printf("%s%s: %s\n", indentation_string.c_str(), element->type.c_str(), element->text.c_str());
+  for (ConversationElement* child : element->children) {
+    walk(child, indentation + 2);
+  }
+}
+
+void Conversation::checkAndAdd(
+  string line,
+  int line_count,
+  int last_indentation,
+  int new_indentation,
+  ConversationElement* new_element,
+  ConversationElement* last_element) {
+  
   if (new_indentation < 2) {
-    printf("Syntax error on line %d! Expected speech to have indentation at least 2 spaces", line_count);
+    printf("Syntax error on line %d! Expected element to have indentation at least 2 spaces\n", line_count);
+    printf("%s\n", line.c_str());
     exit(1);
-  } else if (abs(new_indentation - current_indentation) > 2) {
-    printf("Syntax error on line %d! Expected indentation within 2 spaces of previous indentation", line_count);
+  } else if (abs(new_indentation - last_indentation) > 2) {
+    printf("Syntax error on line %d! Expected indentation within 2 spaces of previous indentation\n", line_count);
+    printf("%s\n", line.c_str());
     exit(1);
   } else if (new_indentation % 2 != 0) {
-    printf("Syntax error on line %d! Expected an even indentation value", line_count);
+    printf("Syntax error on line %d! Expected an even indentation value\n", line_count);
+    printf("%s\n", line.c_str());
     exit(1);
-  } else if (new_indentation < current_indentation) {
-      sub_conversation.pop();
-      current_indentation = new_indentation;
-  } else if (new_indentation > current_indentation) {
-    sub_conversation.top()->back()->children = {};
-    sub_conversation.push(&sub_conversation.top()->back()->children);
-    current_indentation = new_indentation;
+  }
+
+  if (new_indentation == last_indentation) {
+    new_element->parent = last_element->parent;
+    last_element->parent->children.push_back(new_element);
+  } else if (new_indentation > last_indentation) {
+    new_element->parent = last_element;
+    last_element->children.push_back(new_element);
+  } else if (new_indentation < last_indentation) {
+    // assume the new indentation is equal to the parent level. might be a bad assumption.
+    new_element->parent = last_element->parent->parent;
+    last_element->parent->parent->children.push_back(new_element);
   }
 }
 
 void Conversation::setCurrentConversation(string conversation_name) {
-  if (conversations.count(conversation_name) != 1) {
+  printf("Setting conversation to %s\n", conversation_name.c_str());
+  if (conversation_trees.count(conversation_name) != 1) {
     printf("Error! Couldn't find conversation %s\n", conversation_name.c_str());
     exit(1);
   }
 
-  current_conversation = conversations[conversation_name];
+  current_conversation_name = conversation_name;
+  current_conversation_root = conversation_trees[conversation_name];
+  current_element = current_conversation_root->children[0];
+  
   conversation_position.empty();
-  current_element = conversations[conversation_name][0];
-  sub_conversation.push(&conversations[conversation_name]);
   conversation_position.push(0);
+
   choice_value = 0;
 
+  finished = false;
+  finish_value = "";
+
   setMenus();
+}
+
+string Conversation::getCurrentConversation() {
+  return current_conversation_name;
 }
 
 void Conversation::up() {
@@ -196,7 +247,7 @@ void Conversation::up() {
     sound.playSound("select_sound", 1);
     choice_value -= 1;
     if (choice_value < 0) {
-      choice_value = current_element->num_choices - 1;
+      choice_value = current_element->children.size() - 1;
     }
   }
 }
@@ -207,7 +258,7 @@ void Conversation::down() {
   } else if (current_element->type == "_choice") {
     sound.playSound("select_sound", 1);
     choice_value += 1;
-    if (choice_value > current_element->num_choices - 1) {
+    if (choice_value > current_element->children.size() - 1) {
       choice_value = 0;
     }
   }
@@ -219,43 +270,79 @@ void Conversation::accept() {
     return;
   }
 
-  if (finished()) {
+  if (finished) {
     return;
   }
 
   if (current_element->type == "_choice") {
     sound.playSound("accept_sound", 1);
-    state->values["music_choice"] = choice_value;
-    current_element = NULL;
-    conversation_position = {};
-    return;
   }
 
-  if (current_element->children.size() > 0) {
-    // If there is a child conversation, push it onto the stack and start walking it
+  next();
+}
+
+void Conversation::next() {
+  printf("Called next. I am in node %s %s\n", current_element->type.c_str(), current_element->text.c_str());
+
+  if (current_element->type == "_choice") {
+    current_element = current_element->children[choice_value]->children[0];
     conversation_position.push(0);
-    sub_conversation.push(&current_element->children);
+    conversation_position.push(0);
+  } else if (current_element->children.size() > 0) {
+    // If there is a child conversation, start walking them.
+    printf("Moving to children of element.\n");
+    conversation_position.push(0);
     current_element = current_element->children[0];
-  } else if (conversation_position.top() < sub_conversation.top()->size() - 1) {
-    // Otherwise, if there are still elements in this sub-conversation, walk to the next one
+  } else if (current_element->parent->children.size() > conversation_position.top()) {
+    // Otherwise, if there are still siblings, walk them
+    printf("Moving to next sibling.\n");
     conversation_position.top() += 1;
-    current_element = (*sub_conversation.top())[conversation_position.top()];
-  } else if (conversation_position.top() >= sub_conversation.top()->size() - 1) {
-    // Otherwise, pop this sub-conversation and go back to the next one.
-    conversation_position.pop();
-    sub_conversation.pop();
-    if (conversation_position.size() > 0) {
+    current_element = current_element->parent->children[conversation_position.top()];
+  } else if (conversation_position.top() >= current_element->parent->children.size()) {
+    if (current_element->parent->type != "_choice_value") {
+      // Otherwise, pop this element and go back to the parent, and go next from that.
+      current_element = current_element->parent;
+      conversation_position.pop();
       conversation_position.top() += 1;
+      next();
+    } else {
+      // Go past the choice
+      current_element = current_element->parent->parent;
+      conversation_position.pop();
+      conversation_position.pop();
+      conversation_position.top() += 1;
+      next();
     }
   }
 
-  if (current_element != NULL) {
+  printf("Now I am in node %s %s\n", current_element->type.c_str(), current_element->text.c_str());
+
+  if (current_element->type == "_action") {
+    printf("Action is %s\n", current_element->text.c_str());
+    std::smatch matches;
+    regex r_action_parts("([^ ]+) = ([^ ]+)");
+    if (regex_match(current_element->text, matches, r_action_parts)) {
+      string key = matches[1].str();
+      string value = matches[2].str();
+      printf("Setting %s to %s.\n", key.c_str(), value.c_str());
+      state->storeString(key, value);
+    } else {
+      printf("Malformed action!\n");
+    }
+    next();
+  } else if (current_element->type == "_choice_value") {
+    printf("I'm in a choice value. I don't think I'm supposed to be here.\n");
+    next();
+  } else if (current_element->type == "_next") {
+    setCurrentConversation(current_element->text);
+  } else if (current_element->type == "_finish") {
+    finish_value = current_element->text;
+    finished = true;
+  } else if (current_element->type == "_choice") {
+    setMenus();
+  } else if (current_element->type == "_speech") {
     setMenus();
   }
-}
-
-bool Conversation::finished() {
-  return conversation_position.size() == 0;
 }
 
 void Conversation::setMenus() {
@@ -269,7 +356,7 @@ void Conversation::setMenus() {
   if (current_element->type == "_choice") {
     vector<string> lines = {};
     printf("Checking choices\n");
-    for (ConversationElementTD* element : current_element->choices) {
+    for (ConversationElementTD* element : current_element->children) {
       printf("Found a choice: %s\n", element->text.c_str());
       lines.push_back(element->text);
     }
@@ -278,7 +365,7 @@ void Conversation::setMenus() {
 }
 
 void Conversation::draw() {
-  if (finished() && current_element == NULL) return;
+  if (finished) return;
 
   character_box->draw();
   conversation_box->draw();

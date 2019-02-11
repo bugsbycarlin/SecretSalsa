@@ -39,6 +39,8 @@ class PermanentCharacter {
   int attack_min;
   int attack_max;
 
+  string skill;
+
  protected:
   static int unique_count;
 };

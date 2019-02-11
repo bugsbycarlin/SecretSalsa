@@ -29,6 +29,8 @@ void PermanentCharacter::loadFromConfig(string name) {
   defense = hot_config.getInt("game", name + "_defense");
   attack_min = hot_config.getInt("game", name + "_attack_min");
   attack_max = hot_config.getInt("game", name + "_attack_max");
+
+  skill = hot_config.getString("game", name + "_skill");
 }
 
 PermanentCharacter::~PermanentCharacter() {

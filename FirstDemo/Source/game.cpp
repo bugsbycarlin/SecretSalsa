@@ -108,11 +108,13 @@ void Game::initialize() {
     "thunder"
   });
 
-  state->music[0] = "crepuscolo_su_saturno";
-  state->music[1] = "water";
-  state->music[2] = "sangue_su_callisto";
-  state->music[3] = "piano";
-  state->music[4] = "fog_burning_dawn";
+  state->music["galapaghost"] = "crepuscolo_su_saturno";
+  state->music["super_brute_brothers"] = "water";
+  state->music["the_vicious_venues"] = "sangue_su_callisto";
+  state->music["wimpsteed"] = "piano";
+  state->music["the_books"] = "fog_burning_dawn";
+
+  sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
 
   if (hot_config.getString("game", "starting_screen") == "talking") {
     state->modes.push(new Talkin(state));

@@ -32,12 +32,12 @@ void Walkin::initializeWalkingParty() {
     party->add(character);
   }
 
-  if (state->values.count("music_choice") != 1) {
+  if (state->string_values.count("music_choice") != 1) {
     printf("No music chosen.\n");
-    state->values["music_choice"] = math_utils.randomInt(0,4);
+    state->string_values["music_choice"] = state->getString("music_" + to_string(math_utils.randomInt(0,4)));
   }
-  printf("This is the song: %s\n", state->music[state->values["music_choice"]].c_str());
-  sound.playMusic(state->music[state->values["music_choice"]], -1);
+  printf("This is the song: %s\n", state->music[state->getString("music_choice")].c_str());
+  sound.playMusic(state->music[state->getString("music_choice")], -1);
   
 }
 
@@ -235,8 +235,14 @@ void Walkin::gameLogic() {
       character->cloneFromPermanentCharacter(character->permanent_character);
     }
     timing.mark("post_battle_grace");
-    sound.playMusic(state->music[state->values["music_choice"]], -1);
-    sound.setMusicVolume(1.0);
+    if (hot_config.getBool("music", "switch_music_for_battle")) {
+      sound.playMusic(state->music[state->getString("music_choice")], -1);
+      float volume = 1.0;
+      if (volume > hot_config.getFloat("music", "music_volume")) {
+        volume = hot_config.getFloat("music", "music_volume");
+      }
+      sound.setMusicVolume(volume);
+    }
   }
 
   if (timing.since("wait_for_rain") > wait_for_rain 
@@ -259,6 +265,7 @@ void Walkin::gameLogic() {
     }
     if (lap_zone_counter == 4) {
       lap_zone_counter = 0;
+      sound.playSound("accept_sound", 1);
       state->store("laps", state->get("laps") + 1);
       addBaddieParty();
     }

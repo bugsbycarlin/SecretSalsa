@@ -219,6 +219,8 @@ void BattleCharacter::cloneFromCharacter(Character* character) {
   attack_max = character->attack_max;
   defense = character->defense;
 
+  skill = character->skill;
+
   permanent_character = character->permanent_character;
 }
 

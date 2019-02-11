@@ -10,8 +10,8 @@ _conversation training_introduction
   _speech Coach Bulldog: They're gonna hit you hard!
   _speech Tune Bear: Tune bear understands.
   _speech Coach Bulldog: And you're gonna give me as many laps as you can. Go dogs!
-  _speech Tune Bear: Around the track?
-  _speech Coach Bulldog: Around this track. Until my boys bring you down.
+  _speech Tune Bear: Counterclockwise?
+  _speech Coach Bulldog: What does that mean?! Around the track! Until my boys bring you down.
   _speech Coach Bulldog: If you do 10 laps, you're in the pack.
   _speech Tune Bear: Actually Tune Bear doesn't understand. Can Coach break it down again?
   _speech Coach Bulldog: THIS IS THE DOGS. THIS IS HOW WE DO IT. GO DOGS! YOUR VISOR'S GONNA COME STRAIGHT OFF.
@@ -22,26 +22,37 @@ _conversation training_introduction
   _speech Coach Bulldog: YOU READY?
   _speech Tune Bear: Tune Bear is ready!
   _speech Coach Bulldog: LET'S DO THIS! Go dogs.
+  _next music_choice
+
+_conversation throwaway
+  _speech Tune Bear: maybe put gauge damage in the music choices
+
+_conversation music_choice
   _choice Tune Bear: (To himself) Hmm, which music will Tune Bear use for this challenge?
     _choice_value Galapaghost (Fast song, +Speed, +Agility)
-      _action tune_bear_music = galapaghost
+      _action music_choice = galapaghost
+      _finish walking
     _choice_value Super Brute Brothers (Resolute song, +Endurance, +HP)
-      _action tune_bear_music = super_brute_brothers
+      _action music_choice = super_brute_brothers
+      _finish walking
     _choice_value The Vicious Venues (Berserk song, High Chance of Critical Hit)
-      _action tune_bear_music = the_vicious_venues
+      _action music_choice = the_vicious_venues
+      _finish walking
     _choice_value Wimpsteed (Sad song, -Speed, -Enemy Attack)
-      _action tune_bear_music = wimpsteed
+      _action music_choice = wimpsteed
+      _finish walking
     _choice_value The Books (Chill song, Immune to Rain)
-      _action tune_bear_music = the_books
+      _action music_choice = the_books
+      _finish walking
 
 _conversation training_failure
   _speech Coach Bulldog: Looks like my boys brought you DOWN.
   _speech Coach Bulldog: It's okay. My boys are the toughest boys. GO DOGS!
   _choice Coach Bulldog: You want to rest up and try again?
     _choice_value Yes!
-      _action try_again = true
+      _next music_choice
     _choice_value No
-      _action try_again = false
+      _finish fade
 
 _conversation training_success
   _speech Coach Bulldog: You did it! You're a dog now. GO DOGS!
@@ -49,3 +60,4 @@ _conversation training_success
   _speech Coach Bulldog: I mean you're in the pack, son!
   _speech Tune Bear: Does Tune Bear get his fancy peanut butter now?
   _speech Coach Bulldog: Son, you get all the peanut butter you want. GO DOGS!
+  _finish fade

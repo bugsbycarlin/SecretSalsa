@@ -29,41 +29,52 @@ class Conversation {
 
   void loadConversations(string conversation_filepath);
   void setCurrentConversation(string conversation_name);
+  string getCurrentConversation();
   
   void up();
   void down();
   void accept();
 
-  bool finished();
-
   void draw();
 
   ~Conversation();
+
+  bool finished;
+  string finish_value;
 
  private:
   typedef struct ConversationElementTD {
     string type;
     string name;
     string text;
-    string action;
-    int num_choices;
     vector<ConversationElementTD*> children;
-    vector<ConversationElementTD*> choices;
+    ConversationElementTD* parent;
   } ConversationElement;
 
   void setMenus();
-  void handleIndentation(int new_indentation, int line_count);
 
-  map<string, vector<ConversationElement*>> conversations;
-  vector<ConversationElement*> current_conversation;
-  ConversationElement* current_element;
-  stack<vector<ConversationElement*>*> sub_conversation;
-  stack<int> conversation_position;
+  void checkAndAdd(
+    string line,
+    int line_count,
+    int last_indentation,
+    int new_indentation,
+    ConversationElement* new_element,
+    ConversationElement* last_element
+  );
+
+  void walk(ConversationElement* element, int indentation);
+  void next();
+
   int choice_value;
 
-  map<string, string> character_images;
+  map<string, ConversationElement*> conversation_trees;
 
-  int current_indentation;
+  string current_conversation_name;
+  ConversationElement* current_conversation_root;
+  ConversationElement* current_element;
+  stack<int> conversation_position;
+
+  map<string, string> character_images;
 
   State* state;
 
