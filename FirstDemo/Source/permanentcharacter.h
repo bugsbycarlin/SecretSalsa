@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include "honey.h"
 #include "state.h"
 
@@ -35,11 +38,13 @@ class PermanentCharacter {
   int max_hp;
   float ap_rate;
 
+  float dodge;
   int defense;
   int attack_min;
   int attack_max;
 
   string skill;
+  vector<string> skill_list;
 
  protected:
   static int unique_count;

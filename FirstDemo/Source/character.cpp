@@ -91,10 +91,12 @@ void Character::cloneFromPermanentCharacter(PermanentCharacter* character) {
   defense = character->defense;
   attack_min = character->attack_min;
   attack_max = character->attack_max;
+  dodge = character->dodge;
 
   permanent_character = character;
 
   skill = character->skill;
+  skill_list = character->skill_list;
 }
 
 Character::~Character() {

@@ -16,6 +16,12 @@ BattleCharacter::BattleCharacter(State* state) : Character(state) {
 
   attack_jump_time = hot_config.getFloat("game", "default_battle_jump_time");
   attack_hold_time = hot_config.getFloat("game", "default_battle_hold_time");
+
+  magic_incantation_time = hot_config.getFloat("game", "default_magic_incantation_time");
+  magic_effect_time = hot_config.getFloat("game", "default_magic_effect_time");
+
+  status_effects = {};
+  status_effects["blind"] = false;
 }
 
 void BattleCharacter::walkToStartingPosition() {
@@ -35,6 +41,7 @@ void BattleCharacter::walkToStartingPosition() {
 
 void BattleCharacter::startAutomaticBattle(vector<BattleCharacter*> opposing_party) {
   int count = 0;
+  target = NULL;
   while(target == NULL || target->hp == 0) {
     target = opposing_party[math_utils.randomInt(0, opposing_party.size())];
     count++;
@@ -86,7 +93,10 @@ void BattleCharacter::continueAttack() {
     effects.start(unique_name + "_attack_hold_move");
 
     // TODO dodge here
-    if (target->battle_x == target->battle_home_x && target->battle_y == target->battle_home_y) {
+    int miss_check = status_effects["blind"] ? 650 : 0;
+    if (target->battle_x == target->battle_home_x
+      && target->battle_y == target->battle_home_y
+      && math_utils.randomInt(0, 1000) > (target->dodge * 1000.0 + miss_check)) {
       sound.playSound(name + "_attack", 1);
       damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
       if (damage_value < 1) damage_value = 1;
@@ -191,11 +201,20 @@ void BattleCharacter::drawActiveMode() {
 
   if (effects.busy(unique_name + "_attack_hold_move")) {
     graphics.drawImage(
-    "attack_slash_thick",
-    target->battle_x,
-    target->battle_y + target->margin_y,
-    true, 0, target->direction, 1, 1
-  );
+      "attack_slash_thick",
+      target->battle_x,
+      target->battle_y + target->margin_y,
+      true, 0, target->direction, 1, 1
+    );
+  }
+
+  if (status_effects["blind"] && hp > 0 && action_state != "acting") {
+    graphics.drawImage(
+      "glasses",
+      battle_x - 5,
+      battle_y + margin_y - bounce_y - 28,
+      true, 0, direction, 1, 1
+    );
   }
 }
 
@@ -226,8 +245,10 @@ void BattleCharacter::cloneFromCharacter(Character* character) {
   attack_min = character->attack_min;
   attack_max = character->attack_max;
   defense = character->defense;
+  dodge = character->dodge;
 
   skill = character->skill;
+  skill_list = character->skill_list;
 
   permanent_character = character->permanent_character;
 }

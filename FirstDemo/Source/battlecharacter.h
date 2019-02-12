@@ -53,10 +53,23 @@ class BattleCharacter : public Character {
   float attack_jump_time;
   float attack_hold_time;
 
-  string action_state; // charging, ready, waiting, choosing, acting, ko
+  string action_state; // charging, ready, waiting, choosing, acting, skill, ko
 
   bool player_character;
 
   BattleCharacter* target;
+
+  map<string, bool> status_effects;
+
+
+  // Skill specific methods and parameters
+  void startMagic();
+  void continueMagic();
+
+  string current_magic;
+  vector<BattleCharacter*> magic_targets;
+
+  float magic_incantation_time;
+  float magic_effect_time;
 
 };

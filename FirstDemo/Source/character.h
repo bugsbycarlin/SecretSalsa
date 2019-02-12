@@ -64,11 +64,13 @@ class Character {
   int max_hp;
   float ap_rate;
 
+  float dodge;
   int defense;
   int attack_min;
   int attack_max;
 
   string skill;
+  vector<string> skill_list;
 
  protected:
   static int unique_count;

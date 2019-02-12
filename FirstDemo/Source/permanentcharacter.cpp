@@ -29,8 +29,12 @@ void PermanentCharacter::loadFromConfig(string name) {
   defense = hot_config.getInt("game", name + "_defense");
   attack_min = hot_config.getInt("game", name + "_attack_min");
   attack_max = hot_config.getInt("game", name + "_attack_max");
+  dodge = hot_config.getFloat("game", name + "_dodge");
 
   skill = hot_config.getString("game", name + "_skill");
+
+  string skill_list_string = hot_config.getString("game", name + "_skill_list");
+  boost::split(skill_list, skill_list_string, boost::is_any_of(","), boost::token_compress_on);
 }
 
 PermanentCharacter::~PermanentCharacter() {

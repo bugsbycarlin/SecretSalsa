@@ -23,6 +23,7 @@ void Game::loop() {
 }
 
 void Game::initialize() {
+  printf("Here 0\n");
   state->screen_color = hot_config.getString("layout", "screen_color");
   state->screen_width = hot_config.getInt("layout", "screen_width");
   state->screen_height = hot_config.getInt("layout", "screen_height");
@@ -51,9 +52,11 @@ void Game::initialize() {
     "charge_gauge_orange_fill",
     "charge_gauge_green_fill",
     "attack_slash_thick",
-    "black_screen"
+    "black_screen",
+    "glasses"
   });
 
+  printf("Here 1\n");
   PermanentCharacter* p;
 
   p = new PermanentCharacter(state);
@@ -72,6 +75,7 @@ void Game::initialize() {
   p->loadFromConfig("bigdog");
   state->enemy_templates["bigdog"] = p;
 
+  printf("Here 2\n");
   layouts.makeTileLayout(
     "battle_left_layout",
     hot_config.getInt("layout", "battle_left_layout_x"),
@@ -114,6 +118,13 @@ void Game::initialize() {
     "coach_bulldog_speech_2",
     "tune_bear_speech_1",
     "tune_bear_speech_2",
+    "ice_shatter_1",
+    "ice_shatter_2",
+    "ice_shatter_3",
+    "ice_shatter_4",
+    "ice_shatter_5",
+    "toot",
+    "dust"
   });
 
   state->music["galapaghost"] = "crepuscolo_su_saturno";
@@ -137,7 +148,9 @@ void Game::initialize() {
     state->modes.push(new Walkin(state));
   }
   
+  printf("Here 3\n");
   state->modes.top()->initialize();
+  printf("Here 4\n");
 }
 
 void Game::logic() {

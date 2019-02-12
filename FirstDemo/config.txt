@@ -46,44 +46,57 @@
 </section>
 
 <section name="game">
-  <param type="string" name="starting_screen">talking</param>
+  <param type="string" name="starting_screen">walking</param>
 
   <param type="string" name="battle_pace">one</param>
+
+  <param type="int" name="rain_delay_min">200</param>
+  <param type="int" name="rain_delay_max">800</param>
+
+  <param type="float" name="dust_storm_speed">30</param>
 
   <param type="int" name="tune_bear_hp">127</param>
   <param type="string" name="tune_bear_display_name">Tune Bear</param>
   <param type="float" name="tune_bear_ap_rate">1.8</param>
+  <param type="float" name="tune_bear_dodge">0.05</param>
   <param type="int" name="tune_bear_defense">13</param>
   <param type="int" name="tune_bear_attack_min">42</param>
   <param type="int" name="tune_bear_attack_max">55</param>
   <param type="string" name="tune_bear_skill">Tapes</param>
+  <param type="string" name="tune_bear_skill_list">n/a</param>
   <param type="string" name="tune_bear_ko_sound">ko_2</param>
 
   <param type="int" name="witchycat_hp">109</param>
   <param type="string" name="witchycat_display_name">Witchycat</param>
   <param type="float" name="witchycat_ap_rate">1.8</param>
+  <param type="float" name="witchycat_dodge">0.05</param>
   <param type="int" name="witchycat_defense">10</param>
   <param type="int" name="witchycat_attack_min">35</param>
   <param type="int" name="witchycat_attack_max">39</param>
   <param type="string" name="witchycat_skill">Magic</param>
+  <param type="string" name="witchycat_skill_list">Ice,Dust</param>
   <param type="string" name="witchycat_ko_sound">ko_1</param>
   
   <param type="int" name="robin_hp">83</param>
   <param type="string" name="robin_display_name">Robin</param>
   <param type="float" name="robin_ap_rate">2.4</param>
+  <param type="float" name="robin_dodge">0.25</param>
   <param type="int" name="robin_defense">8</param>
   <param type="int" name="robin_attack_min">25</param>
   <param type="int" name="robin_attack_max">31</param>
   <param type="string" name="robin_skill">Forage</param>
+  <param type="string" name="robin_skill_list">n/a</param>
   <param type="string" name="robin_ko_sound">ko_1</param>
 
-  <param type="int" name="bigdog_hp">90</param>
+  <param type="int" name="bigdog_hp">80</param>
   <param type="string" name="bigdog_display_name">Big Dog</param>
   <param type="float" name="bigdog_ap_rate">1.6</param>
+  <param type="float" name="bigdog_dodge">0.05</param>
   <param type="int" name="bigdog_defense">8</param>
   <param type="int" name="bigdog_attack_min">33</param>
   <param type="int" name="bigdog_attack_max">28</param>
   <param type="string" name="bigdog_skill">None</param>
+  <param type="string" name="bigdog_skill_list">n/a</param>
   <param type="string" name="bigdog_ko_sound">ko_2</param>
 
   <param type="int" name="battle_trigger_distance">40</param>
@@ -95,6 +108,9 @@
   <param type="float" name="default_battle_jump_time">0.5</param>
   <param type="float" name="default_battle_hold_time">0.2</param>
   <param type="float" name="battle_finish_time">1.5</param>
+
+  <param type="float" name="default_magic_incantation_time">1.0</param>
+  <param type="float" name="default_magic_effect_time">1.5</param>
 
   <param type="float" name="bigdog_battle_jump_time">0.4</param>
   <param type="float" name="bigdog_battle_hold_time">0.15</param>
@@ -227,6 +243,36 @@
   <param type="int" name="selection_card_1_font_size">25</param>
   <param type="string" name="selection_card_1_font_color">#000000</param>
 
+  <param type="int" name="selection_card_2_header_x">660</param>
+  <param type="int" name="selection_card_2_header_y">535</param>
+  <param type="int" name="selection_card_2_header_width">180</param>
+  <param type="int" name="selection_card_2_header_height">35</param>
+  <param type="string" name="selection_card_2_header_image_root">notebook_menu</param>
+  <param type="int" name="selection_card_2_header_margin_x">20</param>
+  <param type="int" name="selection_card_2_header_margin_y">0</param>
+  <param type="int" name="selection_card_2_header_num_lines">1</param>
+  <param type="int" name="selection_card_2_header_wrap_length">60</param>
+  <param type="bool" name="selection_card_2_header_typewriter">false</param>
+  <param type="float" name="selection_card_2_header_typewriter_delay">0.05</param>
+  <param type="string" name="selection_card_2_header_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="selection_card_2_header_font_size">25</param>
+  <param type="string" name="selection_card_2_header_font_color">#000000</param>
+
+  <param type="int" name="selection_card_2_x">660</param>
+  <param type="int" name="selection_card_2_y">567</param>
+  <param type="int" name="selection_card_2_width">180</param>
+  <param type="int" name="selection_card_2_height">140</param>
+  <param type="string" name="selection_card_2_image_root">notebook_menu</param>
+  <param type="int" name="selection_card_2_margin_x">20</param>
+  <param type="int" name="selection_card_2_margin_y">10</param>
+  <param type="int" name="selection_card_2_num_lines">4</param>
+  <param type="int" name="selection_card_2_wrap_length">60</param>
+  <param type="bool" name="selection_card_2_typewriter">false</param>
+  <param type="float" name="selection_card_2_typewriter_delay">0.03</param>
+  <param type="string" name="selection_card_2_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
+  <param type="int" name="selection_card_2_font_size">25</param>
+  <param type="string" name="selection_card_2_font_color">#000000</param>
+
   <param type="int" name="battle_choice_x">720</param>
   <param type="int" name="battle_choice_y">594</param>
   <param type="int" name="battle_choice_y_spacing">28</param>
@@ -241,7 +287,7 @@
 
 <section name="music">
   <param type="float" name="music_volume">1.0</param>
-  <param type="bool" name="switch_music_for_battle">false</param>
+  <param type="bool" name="switch_music_for_battle">true</param>
   <param type="string" name="music_1">crepuscolo_su_saturno.mp3</param>
   <param type="string" name="music_2">water.mp3</param>
   <param type="string" name="music_3">sangue_su_callisto.mp3</param>

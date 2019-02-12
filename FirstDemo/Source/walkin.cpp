@@ -32,7 +32,7 @@ void Walkin::initializeWalkingParty() {
   sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
   if (state->string_values.count("music_choice") != 1) {
     printf("No music chosen.\n");
-    state->string_values["music_choice"] = state->getString("music_" + to_string(math_utils.randomInt(0,4)));
+    state->string_values["music_choice"] = state->getString("music_" + to_string(math_utils.randomInt(0,5)));
   }
   printf("This is the song: %s\n", state->music[state->getString("music_choice")].c_str());
   sound.playMusic(state->music[state->getString("music_choice")], -1);
@@ -47,11 +47,11 @@ void Walkin::addBaddieParty() {
   float max_ay_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
 
   int num_baddies_roll = math_utils.randomInt(0,20);
-  int num_baddies = 2;
+  int num_baddies = 3; // 2
   if (num_baddies_roll > 15) {
     num_baddies = 3;
   } else if (num_baddies_roll > 12) {
-    num_baddies = 1;
+    num_baddies = 3; // 1
   }
 
   for (int i = 0; i < num_baddies; i++) {
@@ -145,7 +145,9 @@ void Walkin::initialize() {
   state->camera_x = party->characters[0]->x - (state->screen_width / 2.0);
   state->camera_y = party->characters[0]->y - (state->screen_height / 1.5);
 
-  wait_for_rain = math_utils.randomInt(20,80);
+  wait_for_rain = math_utils.randomInt(
+    hot_config.getInt("game", "rain_delay_min"),
+    hot_config.getInt("game", "rain_delay_max"));
   timing.mark("wait_for_rain");
 
   timing.mark("walking_fade_in");

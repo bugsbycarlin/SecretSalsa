@@ -20,6 +20,8 @@ Map::Map(string map_name) {
     "rain_streak",
     "rain_splash",
     "white_tile",
+    "ice_streak",
+    "cloud"
   });
 
   graphics.addImages("Maps/", {
@@ -31,6 +33,8 @@ Map::Map(string map_name) {
   map_height = graphics.getHeight(map_name);
 
   raining = false;
+  ice_shards = false;
+  dust_storm = 0;
 
   initializeRainLayer();
 
@@ -129,7 +133,7 @@ void Map::logic() {
     //     rain_density++;
     // }
 
-    if (rain_field.size() < rain_density) {
+    if (rain_field.size() < rain_density && !ice_shards) {
       int target_x = math_utils.randomInt(0, map_width);
       int target_y = math_utils.randomInt(0, map_height);
       int distance = math_utils.randomInt(800,1000);
@@ -147,6 +151,7 @@ void Map::logic() {
         int target_x = math_utils.randomInt(0, map_width);
         int target_y = math_utils.randomInt(0, map_height);
         int distance = math_utils.randomInt(800,1000);
+        if (ice_shards) distance = math_utils.randomInt(400, 500);
         int start_x = target_x + (int) (distance * rain_velocity.x);
         int start_y = target_y - (int) (distance * rain_velocity.y);
         rain_field[i].x = start_x;
@@ -171,35 +176,79 @@ void Map::logic() {
       }
     }
   }
+
+  if (dust_storm != 0) {
+    if (dust_field.size() < rain_density) {
+      for (int i = 0; i < 3; i++) {
+        int target_x = math_utils.randomInt(0, map_width);
+        int target_y = math_utils.randomInt(0, map_height);
+        int distance = math_utils.randomInt(600,800);
+        int start_x = target_x + (int) (distance * dust_storm);
+        int start_y = target_y - math_utils.randomInt(0, 100);
+        dust_targets.push_back({target_x, target_y});
+        dust_field.push_back({start_x, start_y});
+        dust_orig_x.push_back(start_x);
+      }
+    } else if (!dust_storm) {
+      dust_field = {};
+      dust_targets = {};
+      dust_orig_x = {};
+    }
+
+    for (int i = 0; i < dust_field.size(); i++) {
+      dust_field[i].x += dust_storm * hot_config.getFloat("game", "dust_storm_speed");
+      if (dust_field[i].y > dust_targets[i].y) dust_field[i].y -= 4;
+      // if (dust_field[i].y < dust_targets[i].y) dust_field[i].y += 4;
+    }
+  }
 }
 
 void Map::draw(int x, int y) {
   graphics.drawImage(map_name, x, y);
 
-  if (raining && timing.since("raining") > 4.0) {
-    graphics.drawImage("rain_layer", 0, 0);
-  } else if (raining && timing.since("raining") >= 2.0) {
-    graphics.setColor("#FFFFFF", (timing.since("raining") / 2.0) - 1.0);
-    graphics.drawImage("rain_layer", 0, 0);
-    graphics.setColor("#FFFFFF", 1.0);
-  }
+  if (raining) {
+    if (timing.since("raining") > 4.0) {
+      graphics.drawImage("rain_layer", 0, 0);
+    } else if (timing.since("raining") >= 2.0) {
+      graphics.setColor("#FFFFFF", (timing.since("raining") / 2.0) - 1.0);
+      graphics.drawImage("rain_layer", 0, 0);
+      graphics.setColor("#FFFFFF", 1.0);
+    }
 
-  for (point p : splash_field) {
-    graphics.setColor("#FFFFFF", 1.0 - p.z / 3.0);
-    graphics.drawImage("rain_splash", p.x + x, p.y + y, true, 0, rain_scale * p.z);
-    graphics.setColor("#FFFFFF", 1.0);
+    for (point p : splash_field) {
+      graphics.setColor("#FFFFFF", 1.0 - p.z / 3.0);
+      graphics.drawImage("rain_splash", p.x + x, p.y + y, true, 0, rain_scale * p.z);
+      graphics.setColor("#FFFFFF", 1.0);
+    }
   }
 }
 
 void Map::overlayer(int x, int y) {
-  for (position p : rain_field) {
-    graphics.drawImage("rain_streak", p.x + x, p.y + y, true, rain_angle, rain_scale);
-  }
-
+  graphics.setColor("#FFFFFF", 1.0);
   if (raining) {
+    if (ice_shards) {
+      for (position p : rain_field) {
+        graphics.drawImage("ice_streak", p.x + x, p.y + y, true, rain_angle, rain_scale);
+      }
+    } else {
+      for (position p : rain_field) {
+        graphics.drawImage("rain_streak", p.x + x, p.y + y, true, rain_angle, rain_scale);
+      }
+    }
+
     graphics.setColor("#FFFFFF", 1.0 / (4.0 * timing.since("raining")));
     graphics.drawImage("white_tile", map_width / 2.0, map_height / 2.0, true, 0, map_width / 64.0);
     graphics.setColor("#FFFFFF", 1.0);
+  }
+
+
+  if (dust_storm != 0) {
+    for (int i = 0; i < dust_field.size(); i++) {
+      position p = dust_field[i];
+      int orig_x = dust_orig_x[i];
+      float scale = std::min(abs(p.x - orig_x) / 600.0, 0.5);
+      graphics.drawImage("cloud", p.x + x, p.y + y, true, 8 * (p.x - orig_x), scale);
+    }
   }
 }
 

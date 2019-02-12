@@ -44,6 +44,8 @@ class Map : public Drawable {
   int map_height;
 
   bool raining;
+  bool ice_shards;
+  int dust_storm;
 
   const float rain_scale = 0.2;
   int rain_density = 150;
@@ -52,6 +54,10 @@ class Map : public Drawable {
   vector<position> rain_field;
   vector<position> rain_targets;
   vector<point> splash_field;
+
+  vector<position> dust_field;
+  vector<position> dust_targets;
+  vector<float> dust_orig_x;
 
   struct map_circle {
     int x;

@@ -35,6 +35,8 @@ class Battlin : public Mode {
   void chargeGauges();
   void handleSelection();
 
+  void cleanUpEffects();
+
   void drawInfoCard();
   void drawSelection();
 
@@ -62,10 +64,9 @@ class Battlin : public Mode {
   int selection_state = 1;
   int selection_1;
   int selection_2;
+  int selection_3;
   int selection_row;
   int selection_column;
-
-  BattleCharacter* acting_enemy;
 
   const int selection_1_max = 3;
 
@@ -80,6 +81,8 @@ class Battlin : public Mode {
   Textbox* damage_text;
 
   Sprite* black_screen;
+
+  int battle_frame_counter;
 
  private:
   string printLine(vector<string> information, vector<int> widths);

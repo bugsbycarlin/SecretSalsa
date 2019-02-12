@@ -44,8 +44,9 @@ void Battlin::initialize() {
     0.0, 0.0, 1.0
   );
 
+  battle_frame_counter = 0;
+
   selection_character = NULL;
-  acting_enemy = NULL;
   timing.mark("done_selecting");
 }
 
@@ -188,6 +189,44 @@ void Battlin::initializeMenus() {
     hot_config.getString("menu", "selection_card_1_font_color")
   );
   selection_card_1->setTextLines({"Attack", "Special", "Move", "Item"});
+
+  selection_card_2_header = new Menu(
+    hot_config.getInt("menu", "selection_card_2_header_x"),
+    hot_config.getInt("menu", "selection_card_2_header_y"),
+    hot_config.getInt("menu", "selection_card_2_header_width"),
+    hot_config.getInt("menu", "selection_card_2_header_height"),
+    "Art/",
+    hot_config.getString("menu", "selection_card_2_header_image_root"),
+    hot_config.getInt("menu", "selection_card_2_header_margin_x"),
+    hot_config.getInt("menu", "selection_card_2_header_margin_y"),
+    hot_config.getInt("menu", "selection_card_2_header_num_lines"),
+    hot_config.getInt("menu", "selection_card_2_header_wrap_length"),
+    hot_config.getBool("menu", "selection_card_2_header_typewriter"),
+    hot_config.getFloat("menu", "selection_card_2_header_typewriter_delay"),
+    hot_config.getString("menu", "selection_card_2_header_font_path"),
+    hot_config.getInt("menu", "selection_card_2_header_font_size"),
+    hot_config.getString("menu", "selection_card_2_header_font_color")
+  );
+  selection_card_2_header->setTextLines({" "});
+
+  selection_card_2 = new Menu(
+    hot_config.getInt("menu", "selection_card_2_x"),
+    hot_config.getInt("menu", "selection_card_2_y"),
+    hot_config.getInt("menu", "selection_card_2_width"),
+    hot_config.getInt("menu", "selection_card_2_height"),
+    "Art/",
+    hot_config.getString("menu", "selection_card_2_image_root"),
+    hot_config.getInt("menu", "selection_card_2_margin_x"),
+    hot_config.getInt("menu", "selection_card_2_margin_y"),
+    hot_config.getInt("menu", "selection_card_2_num_lines"),
+    hot_config.getInt("menu", "selection_card_2_wrap_length"),
+    hot_config.getBool("menu", "selection_card_2_typewriter"),
+    hot_config.getFloat("menu", "selection_card_2_typewriter_delay"),
+    hot_config.getString("menu", "selection_card_2_font_path"),
+    hot_config.getInt("menu", "selection_card_2_font_size"),
+    hot_config.getString("menu", "selection_card_2_font_color")
+  );
+  selection_card_2->setTextLines({" "});
 }
 
 void Battlin::logic() {
@@ -233,6 +272,10 @@ void Battlin::logic() {
       if (character->action_state == "acting") {
         character->continueAttack();
       }
+
+      if (character->action_state == "skill" && character->skill == "Magic") {
+        character->continueMagic();
+      }
     }
 
     for (BattleCharacter* character : everyone) {
@@ -246,7 +289,7 @@ void Battlin::logic() {
 
     bool someone_acting = false;
     for (BattleCharacter* character : everyone) {
-      if (character->action_state == "acting") {
+      if (character->action_state == "acting" || character->action_state == "skill") {
         someone_acting = true;
       }
     }
@@ -274,6 +317,7 @@ void Battlin::logic() {
       selection_character->action_state = "choosing";
       selection_1 = 0;
       selection_2 = 0;
+      selection_3 = 0;
       selection_row = 0;
       selection_column = 0;
       selection_state = 1;
@@ -294,7 +338,14 @@ void Battlin::logic() {
     if (character->hp > 0) player_defeated = false;
   }
 
-  if (mode != "finished" && (player_defeated || enemy_defeated)) {
+  bool someone_acting = false;
+  for (BattleCharacter* character : everyone) {
+    if (character->action_state == "acting" || character->action_state == "skill") {
+      someone_acting = true;
+    }
+  }
+  if (mode != "finished" && (player_defeated || enemy_defeated) && !someone_acting) {
+    cleanUpEffects();
     mode = "finished";
     timing.mark("finished_battlin");
     black_screen->setOpacity(1.0, hot_config.getFloat("game", "battle_finish_time"));
@@ -397,13 +448,20 @@ void Battlin::handleSelection() {
             selection_2 += 1;
           }
         }
+      } else if (selection_1 == 1 && selection_character->skill_list[0] != "n/a") {
+        printf("Skill list has length %lu\n", selection_character->skill_list.size());
+        printf("Skill 1: %s\n", selection_character->skill_list[0].c_str());
+        selection_state = 2;
+        selection_card_2_header->setTextLines({selection_character->skill});
+        selection_card_2->setTextLines(selection_character->skill_list);
       } else {
         selection_character->ap = 0;
         selection_character->action_state = "charging";
         timing.mark("done_selecting");
+        selection_character = NULL;
       }
     }
-  } else if (selection_state == 2) {
+  } else if (selection_state == 2 && selection_1 == 0) {
     if (input.keyPressed("down") > 0) {
       sound.playSound("select_sound", 1);
       selection_2 += 1;
@@ -423,10 +481,58 @@ void Battlin::handleSelection() {
       selection_character->startAttack();
       selection_character = NULL;
     }
+  } else if (selection_state == 2 && selection_1 == 1) {
+    if (input.keyPressed("down") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_2 += 1;
+      if (selection_2 > selection_character->skill_list.size() - 1) {
+        selection_2 = 0;
+      }
+    } else if (input.keyPressed("up") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_2 -= 1;
+      if (selection_2 < 0) {
+        selection_2 = selection_character->skill_list.size() - 1;
+      }
+    } else if (input.keyPressed("a") > 0) {
+      sound.playSound("accept_sound", 1);
+      selection_state = 3;
+      // Move this out somewhere.
+      if (selection_character->skill_list[selection_2] == "Ice"
+        || selection_character->skill_list[selection_2] == "Dust") {
+        selection_3 = -1;
+      }
+    }
+  } else if (selection_state == 3 && selection_character->skill == "Magic") {
+    if (input.keyPressed("a") > 0) {
+      sound.playSound("accept_sound", 1);
+      if (selection_3 == -1) {
+        selection_character->magic_targets = enemy_party;
+      }
+      selection_character->current_magic = selection_character->skill_list[selection_2];
+      selection_character->startMagic();
+      selection_character = NULL;
+    }
   }
 }
 
+/*
+Add cancel
+Add dodge, so the second spell can maybe be dust / wind / blindness
+
+*/
+
+void Battlin::cleanUpEffects() {
+  // Clean up from Ice
+  state->map->ice_shards = false;
+  state->map->rain_velocity = math_utils.rotateVector(0, 1, -1 * state->map->rain_angle);
+
+  state->map->dust_storm = 0;
+}
+
 void Battlin::render() {
+  battle_frame_counter += 1;
+
   state->map->draw(-state->camera_x, -state->camera_y);
 
   if (mode == "prep") {
@@ -451,10 +557,24 @@ void Battlin::render() {
   }
 
   if (mode == "action") {
+    for (BattleCharacter* character : everyone) {
+      if (character->action_state == "skill" 
+        && character->skill == "Magic" 
+        && effects.busy(character->unique_name + "_magic_effect")
+        && character->damage_value >= 0) {
+        damage_text->setText(to_string(character->damage_value));
+        for (BattleCharacter* target : character->magic_targets) {
+          damage_text->draw({target->battle_home_x - target->direction * 50, target->battle_home_y + target->margin_y});
+        }
+      }
+    }
+  }
+
+  if (mode == "action") {
     drawInfoCard();
   }
 
-  if (selection_character != NULL) {
+  if (selection_character != NULL && mode == "action") {
     drawSelection();
   }
 
@@ -533,20 +653,45 @@ void Battlin::drawSelection() {
   selection_card_1_header->draw();
   selection_card_1->draw();
 
-  graphics.drawImage(
-    "choice_arrow_2",
-    hot_config.getInt("menu", "battle_choice_x"),
-    hot_config.getInt("menu", "battle_choice_y") + selection_1 * hot_config.getInt("menu", "battle_choice_y_spacing"),
-    true, 0, 1
-  );
+  if (selection_state == 1) {
+    graphics.drawImage(
+      "choice_arrow_2",
+      hot_config.getInt("menu", "battle_choice_x"),
+      hot_config.getInt("menu", "battle_choice_y") + selection_1 * hot_config.getInt("menu", "battle_choice_y_spacing"),
+      true, 0, 1
+    );
+  }
 
-  if (selection_state == 2) {
+  if (selection_state == 2 && selection_1 == 0) {
     graphics.drawImage(
       "choice_hand",
       enemy_party[selection_2]->battle_x + (good_direction == -1 ? 40 : -60),
       enemy_party[selection_2]->battle_y - 40,
       true, 0, (good_direction == -1 ? 1 : -1), 1, 1
     );
+  }
+
+  if (selection_state >= 2 && selection_1 == 1) {
+    selection_card_2_header->draw();
+    selection_card_2->draw();
+
+    graphics.drawImage(
+      "choice_arrow_2",
+      hot_config.getInt("menu", "battle_choice_x") + 100,
+      hot_config.getInt("menu", "battle_choice_y") + selection_2 * hot_config.getInt("menu", "battle_choice_y_spacing"),
+      true, 0, 1
+    );
+  }
+
+  if (selection_state == 3 && selection_3 == -1 && battle_frame_counter % 2 == 1) {
+    for (BattleCharacter* enemy : enemy_party) {
+      graphics.drawImage(
+        "choice_hand",
+        enemy->battle_x + (good_direction == -1 ? 40 : -60),
+        enemy->battle_y - 40,
+        true, 0, (good_direction == -1 ? 1 : -1), 1, 1
+      );
+    }
   }
 }
 
