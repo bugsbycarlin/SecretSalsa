@@ -86,6 +86,8 @@ void Character::cloneFromPermanentCharacter(PermanentCharacter* character) {
 
   hp = character->hp;
   max_hp = character->max_hp;
+  sp = character->sp;
+  max_sp = character->max_sp;
   ap_rate = character->ap_rate;
 
   defense = character->defense;

@@ -22,9 +22,13 @@ void Walkin::initializeWalkingParty() {
     WalkingCharacter* character = new WalkingCharacter(state);
     character->cloneFromPermanentCharacter(p);
     character->addAnimation("static", {p->name});
+    character->addAnimation("ko", {p->name + "_ko"});
+    character->addAnimation("hurt", {p->name + "_hurt"});
     if (p->name == "robin") {
       character->margin_y = hot_config.getInt("layout", "player_margin_y") - 50;
       character->addAnimation("walking", {"robin", "robin_flapping"});
+    } else if (p->name == "witchycat") {
+      character->addAnimation("casting", {"witchycat", "witchycat_speak"});
     }
     party->add(character);
   }
@@ -37,6 +41,14 @@ void Walkin::initializeWalkingParty() {
   printf("This is the song: %s\n", state->music[state->getString("music_choice")].c_str());
   sound.playMusic(state->music[state->getString("music_choice")], -1);
   
+  state->item_counts = {};
+  state->item_counts.push_back(hot_config.getInt("game", "chicken_start"));
+  state->item_counts.push_back(hot_config.getInt("game", "coffee_start"));
+  state->item_counts.push_back(hot_config.getInt("game", "honey_start"));
+  state->item_names = {};
+  state->item_names.push_back("Chicken");
+  state->item_names.push_back("Coffee");
+  state->item_names.push_back("Honey");
 }
 
 void Walkin::addBaddieParty() {
@@ -47,11 +59,11 @@ void Walkin::addBaddieParty() {
   float max_ay_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
 
   int num_baddies_roll = math_utils.randomInt(0,20);
-  int num_baddies = 3; // 2
+  int num_baddies = 2;
   if (num_baddies_roll > 15) {
     num_baddies = 3;
   } else if (num_baddies_roll > 12) {
-    num_baddies = 3; // 1
+    num_baddies = 1;
   }
 
   for (int i = 0; i < num_baddies; i++) {
@@ -73,6 +85,7 @@ void Walkin::addBaddieParty() {
     baddie->vx = 0;
     baddie->vy = 0;
     baddie->addAnimation("static", {"bigdog_static"});
+    baddie->addAnimation("hurt", {"bigdog_hurt"});
     baddie->addAnimation("attacking", {"bigdog_kick"});
     baddie->addAnimation("walking", {"bigdog_walk_2_3", "bigdog_walk_2_4"});
     baddie->addAnimation("ko", {"bigdog_ko"});
@@ -101,23 +114,7 @@ void Walkin::initialize() {
 
   battle_trigger_distance = hot_config.getInt("game", "battle_trigger_distance");
 
-  lap_count_box = new Menu(
-    hot_config.getInt("menu", "lap_count_x"),
-    hot_config.getInt("menu", "lap_count_y"),
-    hot_config.getInt("menu", "lap_count_width"),
-    hot_config.getInt("menu", "lap_count_height"),
-    "Art/",
-    hot_config.getString("menu", "lap_count_image_root"),
-    hot_config.getInt("menu", "lap_count_margin_x"),
-    hot_config.getInt("menu", "lap_count_margin_y"),
-    hot_config.getInt("menu", "lap_count_num_lines"),
-    hot_config.getInt("menu", "lap_count_wrap_length"),
-    hot_config.getBool("menu", "lap_count_typewriter"),
-    hot_config.getFloat("menu", "lap_count_typewriter_delay"),
-    hot_config.getString("menu", "lap_count_font_path"),
-    hot_config.getInt("menu", "lap_count_font_size"),
-    hot_config.getString("menu", "lap_count_font_color")
-  );
+  lap_count_box = new Menu("Art/", "menu", "lap_count");
 
   lap_zone_counter = 0;
   lap_zones = {
@@ -252,10 +249,6 @@ void Walkin::gameLogic() {
     state->map->startRain();
     sound.playSound("thunder", 1);
   }
-
-  // if (input.keyPressed("b") > 0) {
-  //   state->modes.push(new Battlin(state));
-  // }
 
   int px = party->characters[0]->x;
   int py = party->characters[0]->y;

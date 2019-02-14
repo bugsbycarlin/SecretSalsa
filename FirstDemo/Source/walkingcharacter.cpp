@@ -28,10 +28,17 @@ void WalkingCharacter::walkBehavior(float ax, float ay) {
   vx += ax;
   vy += ay;
 
-  if (vx > max_velocity) vx = max_velocity;
-  if (vx < -max_velocity) vx = -max_velocity;
-  if (vy > max_velocity) vy = max_velocity;
-  if (vy < -max_velocity) vy = -max_velocity;
+  if (!state->map->raining) {
+    if (vx > max_velocity) vx = max_velocity;
+    if (vx < -max_velocity) vx = -max_velocity;
+    if (vy > max_velocity) vy = max_velocity;
+    if (vy < -max_velocity) vy = -max_velocity;
+  } else {
+    if (vx > max_velocity / 1.5) vx = max_velocity / 1.5;
+    if (vx < -max_velocity / 1.5) vx = -max_velocity / 1.5;
+    if (vy > max_velocity / 1.5) vy = max_velocity / 1.5;
+    if (vy < -max_velocity / 1.5) vy = -max_velocity / 1.5;
+  }
 
   position old_position = {x, y};
 
@@ -123,7 +130,7 @@ void WalkingCharacter::koBehavior() {
 
 void WalkingCharacter::draw() {
   // printf("Drawing %s\n", animations["static"][0].c_str());
-  if (hp <= 0 && animations.count("ko") == 1) {
+  if (hp <= 0 && animations.count("ko") == 1 && name == "bigdog") {
     setAnimation("ko");
     setFrame(0);
   } else if (abs(vx) > 0.01 || abs(vy) > 0.01 || animations["static"][0] == "robin") {

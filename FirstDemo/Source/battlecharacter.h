@@ -40,6 +40,8 @@ class BattleCharacter : public Character {
 
   int battle_direction;
 
+  int frame_counter;
+
   int battle_x;
   int battle_y;
   int battle_home_x;

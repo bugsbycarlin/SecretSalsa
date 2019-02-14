@@ -33,6 +33,15 @@ string State::getString(string label) {
   return string_values[label];
 }
 
+void State::refreshParty() {
+  for (PermanentCharacter* character : party) {
+    character->hp = character->max_hp;
+    character->sp = character->max_sp;
+  }
+
+  map->raining = false;
+}
+
 State::~State() {
   // To do: delete the stack of modes
   delete map;

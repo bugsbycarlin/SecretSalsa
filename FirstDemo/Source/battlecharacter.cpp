@@ -22,6 +22,7 @@ BattleCharacter::BattleCharacter(State* state) : Character(state) {
 
   status_effects = {};
   status_effects["blind"] = false;
+  frame_counter = 0;
 }
 
 void BattleCharacter::walkToStartingPosition() {
@@ -42,15 +43,20 @@ void BattleCharacter::walkToStartingPosition() {
 void BattleCharacter::startAutomaticBattle(vector<BattleCharacter*> opposing_party) {
   int count = 0;
   target = NULL;
-  while(target == NULL || target->hp == 0) {
+  while(target == NULL || target->hp <= 0) {
     target = opposing_party[math_utils.randomInt(0, opposing_party.size())];
     count++;
     if (count > 200) {
       printf("WTF, can't find nonzero hp target\n");
-      exit(1);
+      break;
     }
   }
-  startAttack();
+  if (target->hp > 0) {
+    startAttack();
+  } else {
+    action_state = "charging";
+    ap = 0;
+  }
 }
 
 void BattleCharacter::startAttack() {
@@ -104,6 +110,7 @@ void BattleCharacter::continueAttack() {
       if (target->hp < 0) {
         target->hp = 0;
       }
+      timing.mark(target->unique_name + "_hurt");
     } else {
       // MISS!
       damage_value = -1;
@@ -141,6 +148,7 @@ void BattleCharacter::draw() {
 }
 
 void BattleCharacter::drawPrepMode() {
+  frame_counter += 1;
   int bounce_y = effects.tween("simple_bounce_walk_" + unique_name, effects.CUBIC);
   if (bounce_y > hot_config.getInt("animation", "walk_bounce_height")) {
     bounce_y = 2 * hot_config.getInt("animation", "walk_bounce_height") - bounce_y;
@@ -161,22 +169,48 @@ void BattleCharacter::drawPrepMode() {
 }
 
 void BattleCharacter::drawActiveMode() {
-  setAnimation("static");
-  setFrame(0);
+  frame_counter += 1;
   bool flip = false;
-  if (animations.count("attacking") == 1) {
-    if (effects.busy(unique_name + "_attack_move_x")
-      || effects.busy(unique_name + "_attack_hold_move")
-      || effects.busy(unique_name + "_attack_return_x")) {
-      setAnimation("attacking");
-    }
-  }
-  if (action_state != "acting" && hp <= 0) {
+  setAnimation("static");
+  if (animations.count("attacking") == 1 &&
+    (effects.busy(unique_name + "_attack_move_x")
+    || effects.busy(unique_name + "_attack_hold_move")
+    || effects.busy(unique_name + "_attack_return_x"))) {
+    setAnimation("attacking");
+  } else if (action_state != "acting" && hp <= 0) {
     if (animations.count("ko") == 1) {
       setAnimation("ko");
     } else {
       flip = true;
     }
+  } else if (timing.check(unique_name + "_hurt") 
+    && timing.since(unique_name + "_hurt") < hot_config.getFloat("animation", "hurt_time")
+    && animations.count("hurt") == 1) {
+    setAnimation("hurt");
+    setFrame(0);
+  } else if (action_state == "skill" && effects.busy(unique_name + "_magic_incantation") && frame_counter % 10 == 0) {
+    if (animations.count("casting") == 1 && animations["casting"].size() > 1) {
+      current_frame += 1;
+      if (current_frame >= animations["casting"].size()) current_frame = 0;
+      setAnimation("casting");
+      setFrame(current_frame);
+    }
+  } else {
+    setAnimation("static");
+    setFrame(0);
+  }
+
+  if (current_frame > animations[current_animation].size() - 1) {
+    current_frame = current_frame % animations[current_animation].size();
+  }
+
+  int hurt_knockback = 0;
+  if (timing.check(unique_name + "_hurt") 
+    && timing.since(unique_name + "_hurt") >= hot_config.getFloat("animation", "hurt_time")) {
+    timing.remove(unique_name + "_hurt");
+  } else if (timing.check(unique_name + "_hurt") 
+    && timing.since(unique_name + "_hurt") < hot_config.getFloat("animation", "hurt_time")) {
+    hurt_knockback = hot_config.getInt("animation", "hurt_knockback");
   }
 
   int bounce_y = 0;
@@ -194,10 +228,20 @@ void BattleCharacter::drawActiveMode() {
   graphics.setColor("#FFFFFF", 1.0);
   graphics.drawImage(
     animations[current_animation][current_frame],
-    battle_x + margin_x,
+    battle_x + margin_x - direction * hurt_knockback,
     battle_y + margin_y - bounce_y,
     true, 0, direction, flip ? -1 : 1, 1
   );
+
+  // effects.shake(unique_name + "_magic_incantation")
+  if (action_state == "skill" && effects.busy(unique_name + "_magic_incantation")) {
+    graphics.drawImage(
+    "spellbook",
+    battle_x + hot_config.getInt("game", "spellbook_margin_x"),
+    battle_y + hot_config.getInt("game", "spellbook_margin_y"),
+    true, 0, direction, 1, 1
+  );
+  }
 
   if (effects.busy(unique_name + "_attack_hold_move")) {
     graphics.drawImage(
@@ -240,6 +284,8 @@ void BattleCharacter::cloneFromCharacter(Character* character) {
 
   hp = character->hp;
   max_hp = character->max_hp;
+  sp = character->sp;
+  max_sp = character->max_sp;
   ap_rate = character->ap_rate;
 
   attack_min = character->attack_min;

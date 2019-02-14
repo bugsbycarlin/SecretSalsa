@@ -12,59 +12,62 @@ using namespace Honey;
 Conversation::Conversation(State* state) {
   this->state = state;
 
-  character_box = new Menu(
-    hot_config.getInt("menu", "character_x"),
-    hot_config.getInt("menu", "character_y"),
-    hot_config.getInt("menu", "character_width"),
-    hot_config.getInt("menu", "character_height"),
-    "Art/",
-    hot_config.getString("menu", "character_image_root"),
-    hot_config.getInt("menu", "character_margin_x"),
-    hot_config.getInt("menu", "character_margin_y"),
-    hot_config.getInt("menu", "character_num_lines"),
-    hot_config.getInt("menu", "character_wrap_length"),
-    hot_config.getBool("menu", "character_typewriter"),
-    hot_config.getFloat("menu", "character_typewriter_delay"),
-    hot_config.getString("menu", "character_font_path"),
-    hot_config.getInt("menu", "character_font_size"),
-    hot_config.getString("menu", "character_font_color")
-  );
+  // character_box = new Menu(
+  //   hot_config.getInt("menu", "character_x"),
+  //   hot_config.getInt("menu", "character_y"),
+  //   hot_config.getInt("menu", "character_width"),
+  //   hot_config.getInt("menu", "character_height"),
+  //   "Art/",
+  //   hot_config.getString("menu", "character_image_root"),
+  //   hot_config.getInt("menu", "character_margin_x"),
+  //   hot_config.getInt("menu", "character_margin_y"),
+  //   hot_config.getInt("menu", "character_num_lines"),
+  //   hot_config.getInt("menu", "character_wrap_length"),
+  //   hot_config.getBool("menu", "character_typewriter"),
+  //   hot_config.getFloat("menu", "character_typewriter_delay"),
+  //   hot_config.getString("menu", "character_font_path"),
+  //   hot_config.getInt("menu", "character_font_size"),
+  //   hot_config.getString("menu", "character_font_color")
+  // );
+  character_box = new Menu("Art/", "menu", "character");
 
-  conversation_box = new Menu(
-    hot_config.getInt("menu", "conversation_x"),
-    hot_config.getInt("menu", "conversation_y"),
-    hot_config.getInt("menu", "conversation_width"),
-    hot_config.getInt("menu", "conversation_height"),
-    "Art/",
-    hot_config.getString("menu", "conversation_image_root"),
-    hot_config.getInt("menu", "conversation_margin_x"),
-    hot_config.getInt("menu", "conversation_margin_y"),
-    hot_config.getInt("menu", "conversation_num_lines"),
-    hot_config.getInt("menu", "conversation_wrap_length"),
-    hot_config.getBool("menu", "conversation_typewriter"),
-    hot_config.getFloat("menu", "conversation_typewriter_delay"),
-    hot_config.getString("menu", "conversation_font_path"),
-    hot_config.getInt("menu", "conversation_font_size"),
-    hot_config.getString("menu", "conversation_font_color")
-  );
+  // conversation_box = new Menu(
+  //   hot_config.getInt("menu", "conversation_x"),
+  //   hot_config.getInt("menu", "conversation_y"),
+  //   hot_config.getInt("menu", "conversation_width"),
+  //   hot_config.getInt("menu", "conversation_height"),
+  //   "Art/",
+  //   hot_config.getString("menu", "conversation_image_root"),
+  //   hot_config.getInt("menu", "conversation_margin_x"),
+  //   hot_config.getInt("menu", "conversation_margin_y"),
+  //   hot_config.getInt("menu", "conversation_num_lines"),
+  //   hot_config.getInt("menu", "conversation_wrap_length"),
+  //   hot_config.getBool("menu", "conversation_typewriter"),
+  //   hot_config.getFloat("menu", "conversation_typewriter_delay"),
+  //   hot_config.getString("menu", "conversation_font_path"),
+  //   hot_config.getInt("menu", "conversation_font_size"),
+  //   hot_config.getString("menu", "conversation_font_color")
+  // );
+  conversation_box = new Menu("Art/", "menu", "conversation");
 
-  choice_box = new Menu(
-    hot_config.getInt("menu", "choice_x"),
-    hot_config.getInt("menu", "choice_y"),
-    hot_config.getInt("menu", "choice_width"),
-    hot_config.getInt("menu", "choice_height"),
-    "Art/",
-    hot_config.getString("menu", "choice_image_root"),
-    hot_config.getInt("menu", "choice_margin_x"),
-    hot_config.getInt("menu", "choice_margin_y"),
-    hot_config.getInt("menu", "choice_num_lines"),
-    hot_config.getInt("menu", "choice_wrap_length"),
-    hot_config.getBool("menu", "choice_typewriter"),
-    hot_config.getFloat("menu", "choice_typewriter_delay"),
-    hot_config.getString("menu", "choice_font_path"),
-    hot_config.getInt("menu", "choice_font_size"),
-    hot_config.getString("menu", "choice_font_color")
-  );
+  // choice_box = new Menu(
+  //   hot_config.getInt("menu", "choice_x"),
+  //   hot_config.getInt("menu", "choice_y"),
+  //   hot_config.getInt("menu", "choice_width"),
+  //   hot_config.getInt("menu", "choice_height"),
+  //   "Art/",
+  //   hot_config.getString("menu", "choice_image_root"),
+  //   hot_config.getInt("menu", "choice_margin_x"),
+  //   hot_config.getInt("menu", "choice_margin_y"),
+  //   hot_config.getInt("menu", "choice_num_lines"),
+  //   hot_config.getInt("menu", "choice_wrap_length"),
+  //   hot_config.getBool("menu", "choice_typewriter"),
+  //   hot_config.getFloat("menu", "choice_typewriter_delay"),
+  //   hot_config.getString("menu", "choice_font_path"),
+  //   hot_config.getInt("menu", "choice_font_size"),
+  //   hot_config.getString("menu", "choice_font_color")
+  // );
+  choice_box = new Menu("Art/", "menu", "choice");
 
   finished = false;
   finish_value = "";

@@ -32,19 +32,34 @@ void Game::initialize() {
 
   state->store("laps", 0);
 
+  input.addActionKey("up", "up");
+  input.addActionKey("down", "down");
+  input.addActionKey("left", "left");
+  input.addActionKey("right", "right");
+  input.addActionKey("accept", "a");
+  input.addActionKey("cancel", "z");
+
   graphics.addImages("Art/", {
     "bigdog_static",
     "bigdog_walk_2_3",
     "bigdog_walk_2_4",
+    "bigdog_hurt",
     "bigdog_ko",
     "bigdog_kick",
-    "coach_bulldog",
     "coach_bulldog_profile",
+    "coach_bulldog",
+    "tune_bear_profile",
     "tune_bear",
+    "tune_bear_hurt",
+    "tune_bear_ko",
     "robin",
+    "robin_hurt",
+    "robin_ko",
     "robin_flapping",
     "witchycat",
-    "tune_bear_profile",
+    "witchycat_speak",
+    "witchycat_hurt",
+    "witchycat_ko",
     "choice_arrow",
     "choice_arrow_2",
     "choice_hand",
@@ -53,7 +68,11 @@ void Game::initialize() {
     "charge_gauge_green_fill",
     "attack_slash_thick",
     "black_screen",
-    "glasses"
+    "glasses",
+    "spellbook",
+    "Coffee",
+    "Honey",
+    "Chicken"
   });
 
   printf("Here 1\n");
@@ -141,6 +160,7 @@ void Game::initialize() {
   state->storeString("music_4", "the_books");
 
   sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
+  sound.setSoundVolume(hot_config.getFloat("music", "sound_volume"));
 
   if (hot_config.getString("game", "starting_screen") == "talking") {
     state->modes.push(new Talkin(state));

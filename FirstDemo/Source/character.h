@@ -62,6 +62,8 @@ class Character {
 
   int hp;
   int max_hp;
+  int sp;
+  int max_sp;
   float ap_rate;
 
   float dodge;

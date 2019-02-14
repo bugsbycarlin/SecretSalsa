@@ -68,7 +68,10 @@ class Battlin : public Mode {
   int selection_row;
   int selection_column;
 
-  const int selection_1_max = 3;
+  BattleCharacter* item_character;
+  string item_name;
+
+  const int selection_1_max = 2;
 
   // TODO Destroy all of these in the destructor
   Menu* header;

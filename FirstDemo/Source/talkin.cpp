@@ -50,6 +50,7 @@ void Talkin::logic() {
 
   if (timing.since("conversation_fade_out") > 0.5 && conversation->finished) {
     if (conversation->finish_value == "walking") {
+      state->refreshParty();
       state->modes.push(new Walkin(state));
       state->modes.top()->initialize();
     }

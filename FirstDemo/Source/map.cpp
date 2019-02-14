@@ -228,7 +228,7 @@ void Map::overlayer(int x, int y) {
   if (raining) {
     if (ice_shards) {
       for (position p : rain_field) {
-        graphics.drawImage("ice_streak", p.x + x, p.y + y, true, rain_angle, rain_scale);
+        graphics.drawImage("ice_streak", p.x + x, p.y + y, true, rain_angle, 3 * rain_scale);
       }
     } else {
       for (position p : rain_field) {

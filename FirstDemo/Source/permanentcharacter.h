@@ -14,10 +14,11 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include "honey.h"
-#include "state.h"
 
 using namespace Honey;
 using namespace std;
+
+class State;
 
 class PermanentCharacter {
  public:
@@ -36,6 +37,8 @@ class PermanentCharacter {
 
   int hp;
   int max_hp;
+  int sp;
+  int max_sp;
   float ap_rate;
 
   float dodge;

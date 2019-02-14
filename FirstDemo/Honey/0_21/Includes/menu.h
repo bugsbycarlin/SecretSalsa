@@ -22,6 +22,7 @@
 
 // Honey includes
 #include "textbox.h"
+#include "hotconfig.h"
 
 using namespace std;
 
@@ -92,6 +93,19 @@ namespace Honey {
     );
 
     /*!
+      Public constructor. Makes one Menu.
+
+      Initializes a menu using values drawn from config.
+
+      @param image_root the location of art files
+      @param section config section for lookup.
+      @param name_root config root name for lookup.
+      @return a Menu.
+      
+    */
+    Menu(string image_location, string section, string name_root);
+
+    /*!
       Set the text of the Menu, using wrap_length to auto-wrap into lines.
       
       @param text The text of the menu.
@@ -104,6 +118,14 @@ namespace Honey {
       @param text The text of the box.
     */
     void setTextLines(vector<string> lines);
+
+    /*!
+      Set the color of a line of the Menu.
+      
+      @param int line The line number to set.
+      @param color string hex color, eg #FFFFFF.
+    */
+    void setLineColor(int line, string color);
 
     /*!
       Draw the Menu
@@ -134,6 +156,13 @@ namespace Honey {
     static int unique_count;
 
    private:
+    void setupMenu(
+      string image_location,
+      string image_root,
+      string font_path,
+      int font_size,
+      string font_color
+    );
     void makeTextboxes();
 
     vector<Textbox*> textboxes;
@@ -150,7 +179,6 @@ namespace Honey {
     int wrap_length;
     bool typewriter;
     float typewriter_delay;
-
 
     int text_length;
     int typewriter_position; 

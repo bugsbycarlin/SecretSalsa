@@ -16,10 +16,9 @@ void BattleCharacter::startMagic() {
 
   action_state = "skill";
 
-  effects.makeTween(unique_name + "_magic_incantation", 0, 100, magic_incantation_time);
+  effects.makeShake(unique_name + "_magic_incantation", 2, magic_incantation_time);
   effects.start(unique_name + "_magic_incantation");
 
-  printf("I have started the magic incantation for %s\n", current_magic.c_str());
 }
 
 void BattleCharacter::continueMagic() {
@@ -29,7 +28,6 @@ void BattleCharacter::continueMagic() {
 
   if (hp <= 0) {
     // Finish up without doing magic
-    printf("I got killed before I could do magic.\n");
     effects.remove(unique_name + "_magic_incantation");
     effects.remove(unique_name + "_magic_effect");
     if (current_magic == "Ice") {
@@ -49,7 +47,6 @@ void BattleCharacter::continueMagic() {
   }
 
   if (effects.finished(unique_name + "_magic_incantation")) {
-    printf("Now I am switching to the effect.\n");
     effects.remove(unique_name + "_magic_incantation");
     effects.makeTween(unique_name + "_magic_effect", 0, 100, magic_effect_time);
     effects.start(unique_name + "_magic_effect");
@@ -58,7 +55,7 @@ void BattleCharacter::continueMagic() {
     if (current_magic == "Ice") {
       if (state->map->raining) {
         // Good effect
-        sound.playSound("ice_shatter", 1);
+        // sound.playSound("ice_shatter", 1);
         state->map->ice_shards = true;
         state->map->rain_velocity = math_utils.rotateVector(0, 3.2, -1 * state->map->rain_angle);
 
@@ -79,6 +76,7 @@ void BattleCharacter::continueMagic() {
           if (enemy->hp < 0) {
             enemy->hp = 0;
           }
+          timing.mark(enemy->unique_name + "_hurt");
         }
       } else {
         // Useless
@@ -111,12 +109,12 @@ void BattleCharacter::continueMagic() {
       if (enemy->hp < 0) {
         enemy->hp = 0;
       }
+      timing.mark(enemy->unique_name + "_hurt");
       enemy->status_effects["blind"] = true;
     }
   }
 
   if (effects.finished(unique_name + "_magic_effect")) {
-    printf("Now I'm done with magic %s\n", current_magic.c_str());
     if (current_magic == "Ice") {
       state->map->ice_shards = false;
       state->map->rain_velocity = math_utils.rotateVector(0, 1, -1 * state->map->rain_angle);

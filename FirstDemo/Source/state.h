@@ -16,13 +16,13 @@
 
 #include "honey.h"
 
+#include "permanentcharacter.h"
 #include "map.h"
 
 using namespace Honey;
 using namespace std;
 
 class Mode;
-class PermanentCharacter;
 
 class State {
  public:
@@ -33,6 +33,8 @@ class State {
 
   void storeString(string label, string value);
   string getString(string label);
+
+  void refreshParty();
 
   ~State();
 
@@ -52,6 +54,9 @@ class State {
 
   std::map<string, int> values;
   std::map<string, string> string_values;
+
+  std::vector<int> item_counts;
+  std::vector<string> item_names;
   
   std::map<string, string> music;
 
