@@ -123,8 +123,7 @@ void Battlin::initializeMenus() {
   selection_card_1_header->setTextLines({"Action"});
 
   selection_card_1 = new Menu("Art/", "menu", "selection_card_1");
-  selection_card_1->setTextLines({"Attack", "Special", "Item"});
-  // selection_card_1->setLineColor(3, "#cccccc");
+  selection_card_1->setTextLines({"Attack", "Special", "Item", "Move"});
 
   selection_card_2_header = new Menu("Art/", "menu", "selection_card_2_header");
   selection_card_2_header->setTextLines({" "});
@@ -180,6 +179,14 @@ void Battlin::logic() {
       if (character->action_state == "skill" && character->skill == "Magic") {
         character->continueMagic();
       }
+
+      if (character->action_state == "walking" && (character->battle_home_x != character->battle_x
+        || character->battle_home_y != character->battle_y)) {
+        character->walkToStartingPosition();
+      } else if (character->action_state == "walking") {
+        character->action_state = "charging";
+        character->ap = 0;
+      }
     }
 
     for (BattleCharacter* character : everyone) {
@@ -193,6 +200,7 @@ void Battlin::logic() {
 
     bool someone_acting = false;
     for (BattleCharacter* character : everyone) {
+      // || character->action_state == "walking"
       if (character->action_state == "acting" || character->action_state == "skill") {
         someone_acting = true;
       }
@@ -225,7 +233,7 @@ void Battlin::logic() {
       selection_row = 0;
       selection_column = 0;
       selection_state = 1;
-      selection_card_1->setTextLines({"Attack", selection_character->skill, "Item"});
+      selection_card_1->setTextLines({"Attack", selection_character->skill, "Item", "Move"});
     }
   }
 
@@ -244,7 +252,7 @@ void Battlin::logic() {
 
   bool someone_acting = false;
   for (BattleCharacter* character : everyone) {
-    if (character->action_state == "acting" || character->action_state == "skill") {
+    if (character->action_state == "acting" || character->action_state == "skill" || character->action_state == "walking") {
       someone_acting = true;
     }
   }
@@ -346,7 +354,8 @@ void Battlin::handleSelection() {
     } else if (input.actionPressed("accept") > 0) {
       sound.playSound("accept_sound", 1);
       // choose the choice!
-      if (selection_1 == 0) {
+      if (selection_1 == 0 ||
+        (selection_1 == 1 && selection_character->skill == "Forage")) {
         selection_state = 2;
         for (int i = 0; i < enemy_party.size() - 1; i++) {
           if (enemy_party[selection_2]-> hp <= 0) {
@@ -378,6 +387,10 @@ void Battlin::handleSelection() {
             selection_card_2->setLineColor(i, "#CCCCCC");
           }
         }
+      } else if (selection_1 == 3) {
+        selection_state = 2;
+        selection_row = selection_character->battle_row;
+        selection_column = selection_character->battle_column;
       } else {
         selection_character->ap = 0;
         selection_character->action_state = "charging";
@@ -390,7 +403,61 @@ void Battlin::handleSelection() {
       timing.mark("done_selecting");
       selection_character = NULL;
     }
-  } else if (selection_state == 2 && selection_1 == 0) {
+  } else if (selection_state == 2 && selection_1 == 3) {
+    if (input.actionPressed("left") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_column -= 1;
+      if (selection_column < 0) {
+        selection_column = 1;
+      }
+    } else if (input.actionPressed("right") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_column += 1;
+      if (selection_column > 1) {
+        selection_column = 0;
+      }
+    } else if (input.actionPressed("up") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_row -= 1;
+      if (selection_row < 0) {
+        selection_row = 3;
+      }
+    } else if (input.actionPressed("down") > 0) {
+      sound.playSound("select_sound", 1);
+      selection_row += 1;
+      if (selection_row > 3) {
+        selection_row = 0;
+      }
+    } else if (input.actionPressed("cancel") > 0) {
+      selection_state = 1;
+    } else if (input.actionPressed("accept") > 0) {
+      bool occupied = false;
+      for (BattleCharacter* character : player_party) {
+        if (character->battle_row == selection_row && character->battle_column == selection_column) {
+          occupied = true;
+        }
+      }
+
+      if (!occupied) {
+        sound.playSound("accept_sound", 1);
+        string good_place = "left";
+        if (good_direction == -1) {
+          good_place = "right";
+        }  
+        selection_character->battle_row = selection_row;
+        selection_character->battle_column = selection_column;
+
+        selection_character->addBounceAnimation();
+
+        position p = layouts.tile("battle_" + good_place + "_layout", selection_character->battle_column, selection_character->battle_row);
+        selection_character->battle_home_x = p.x + -1 * good_direction * hot_config.getInt("layout", "battle_layout_tilt") * selection_character->battle_row;
+        selection_character->battle_home_y = p.y;
+        selection_character->startWalk();
+
+        selection_character = NULL;
+      }
+    }
+  } else if (selection_state == 2 && (selection_1 == 0 || (selection_1 == 1 && selection_character->skill == "Forage"))) {
     if (input.actionPressed("down") > 0) {
       sound.playSound("select_sound", 1);
       selection_2 += 1;
@@ -406,6 +473,11 @@ void Battlin::handleSelection() {
     } else if (input.actionPressed("accept") > 0) {
       sound.playSound("accept_sound", 1);
       // choose the choice!
+      if ((selection_1 == 1 && selection_character->skill == "Forage")) {
+        selection_character->attack_using_skill = true;
+      } else {
+        selection_character->attack_using_skill = false;
+      }
       selection_character->target = enemy_party[selection_2];
       selection_character->startAttack();
       selection_character = NULL;
@@ -570,6 +642,9 @@ void Battlin::render() {
   // I think this is a dummy to keep checking and eventually finish the effect
   if (effects.busy("battle_item_use")) {
     float x = effects.tween("battle_item_use", effects.LINEAR);
+    if (state->string_values.count("battle_item_use") == 1 && state->getString("battle_item_use") != "") {
+      item_name = state->getString("battle_item_use");
+    }
     graphics.setColor("#FFFFFF", x);
     graphics.drawImage(
       item_name,
@@ -585,7 +660,8 @@ void Battlin::render() {
     // This should be sorted by y value
     for (BattleCharacter* character : everyone) {
       character->drawActiveMode();
-      if (effects.busy(character->unique_name + "_attack_hold_move")) {
+      if (effects.busy(character->unique_name + "_attack_hold_move") &&
+        !(character->attack_using_skill && character->skill == "Forage")) {
         if (character->damage_value >= 0) {
           damage_text->setColor("#bb0000");
           damage_text->setText(to_string(character->damage_value));
@@ -708,7 +784,22 @@ void Battlin::drawSelection() {
     );
   }
 
-  if (selection_state == 2 && selection_1 == 0) {
+  if (selection_state == 2 && selection_1 == 3) {
+    string good_place = "left";
+    if (good_direction == -1) {
+      good_place = "right";
+    } 
+    position p = layouts.tile("battle_" + good_place + "_layout", selection_column, selection_row);
+    graphics.drawImage(
+      "choice_hand",
+      p.x - good_direction * hot_config.getInt("layout", "battle_layout_tilt") * selection_row + (good_direction == -1 ? -40 : 40),
+      p.y - 40,
+      true, 0, good_direction, 1, 1
+    );
+  }
+
+  if ((selection_state == 2 && selection_1 == 0) ||
+    (selection_state == 2 && selection_1 == 1 && selection_character->skill == "Forage")) {
     graphics.drawImage(
       "choice_hand",
       enemy_party[selection_2]->battle_x + (good_direction == -1 ? 40 : -60),
@@ -718,15 +809,17 @@ void Battlin::drawSelection() {
   }
 
   if (selection_state >= 2 && (selection_1 == 1 || selection_1 == 2)) {
-    selection_card_2_header->draw();
-    selection_card_2->draw();
+    if (selection_1 == 2 || selection_character->skill_list.size() > 0) {
+      selection_card_2_header->draw();
+      selection_card_2->draw();
 
-    graphics.drawImage(
-      "choice_arrow_2",
-      hot_config.getInt("menu", "battle_choice_x") + 100,
-      hot_config.getInt("menu", "battle_choice_y") + selection_2 * hot_config.getInt("menu", "battle_choice_y_spacing"),
-      true, 0, 1
-    );
+      graphics.drawImage(
+        "choice_arrow_2",
+        hot_config.getInt("menu", "battle_choice_x") + 100,
+        hot_config.getInt("menu", "battle_choice_y") + selection_2 * hot_config.getInt("menu", "battle_choice_y_spacing"),
+        true, 0, 1
+      );
+    }
   }
 
   if (selection_state == 3 && selection_1 == 2) {

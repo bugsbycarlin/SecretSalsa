@@ -71,7 +71,7 @@ class Battlin : public Mode {
   BattleCharacter* item_character;
   string item_name;
 
-  const int selection_1_max = 2;
+  const int selection_1_max = 3;
 
   // TODO Destroy all of these in the destructor
   Menu* header;

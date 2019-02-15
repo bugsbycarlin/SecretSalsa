@@ -44,13 +44,25 @@ void Talkin::logic() {
   if (conversation->finished && !timing.check("conversation_fade_out")) {
     timing.mark("conversation_fade_out");
     if (conversation->finish_value == "fade") {
+      if (!timing.check("end_state_pause")) {
+        timing.mark("end_state_pause");
+      }
+    }
+  }
+
+  if (timing.check("end_state_pause") && timing.since("end_state_pause") > 1.0) {
+    timing.remove("end_state_pause");
+    if (conversation->getCurrentConversation() == "training_failure") {
       sound.playMusic("game_over", 1);
+    } else if (conversation->getCurrentConversation() == "training_success") {
+      sound.playMusic("win_music", 1);
     }
   }
 
   if (timing.since("conversation_fade_out") > 0.5 && conversation->finished) {
     if (conversation->finish_value == "walking") {
       state->refreshParty();
+      state->store("laps", 0);
       state->modes.push(new Walkin(state));
       state->modes.top()->initialize();
     }

@@ -118,7 +118,8 @@ void Game::initialize() {
     "piano",
     "fog_burning_dawn",
     "battle_fanfare",
-    "game_over"
+    "game_over",
+    "win_music"
   });
 
   sound.addSounds("Sound/", {

@@ -49,7 +49,7 @@ class Character {
   int x;
   int y;
 
-  int direction;
+  int direction; // -1 is left, +1 is right
 
   // Display parameters
   int margin_x;
@@ -70,6 +70,8 @@ class Character {
   int defense;
   int attack_min;
   int attack_max;
+
+  string item;
 
   string skill;
   vector<string> skill_list;

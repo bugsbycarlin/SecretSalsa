@@ -96,6 +96,17 @@ void Walkin::addBaddieParty() {
     baddie->max_ax *= max_ax_multiplier;
     baddie->max_ay *= max_ay_multiplier;
 
+    int item_roll = math_utils.randomInt(0,60);
+    if (item_roll < 10) {
+      baddie->item = "Chicken";
+    } else if (item_roll < 20) {
+      baddie->item = "Coffee";
+    } else if (item_roll < 30) {
+      baddie->item = "Honey";
+    } else {
+      baddie->item = "None";
+    }
+
     baddie_party->add(baddie);
   }
 
@@ -261,7 +272,19 @@ void Walkin::gameLogic() {
       sound.playSound("accept_sound", 1);
       state->store("laps", state->get("laps") + 1);
       addBaddieParty();
+
+      if (state->get("laps") >= 10) {
+        timing.mark("success_ending");
+      }
     }
+  }
+
+  if (timing.check("success_ending") && timing.since("success_ending") >= 2.0) {
+    state->modes = {}; // huge leak
+    Talkin* x = new Talkin(state);
+    state->modes.push(x);
+    x->initialize();
+    x->conversation->setCurrentConversation("training_success");
   }
 
   for (WalkingParty* baddie_party : baddie_parties) {
@@ -272,24 +295,26 @@ void Walkin::gameLogic() {
     }
   }
 
-  found_battle = false;
-  if (!timing.check("post_battle_grace") || 
-    timing.since("post_battle_grace") > hot_config.getFloat("game", "post_battle_grace_period")) {
-    for (WalkingParty* baddie_party : baddie_parties) {
-      for (WalkingCharacter* baddie : baddie_party->characters) {
-        for (WalkingCharacter* goodie : party->characters) {
-          if (baddie->hp > 0 && math_utils.distance(baddie->x, baddie->y, goodie->x, goodie->y) < battle_trigger_distance && !found_battle) {
-            found_battle = true;
-            // This will leak when it pops. Gotta delete it somewhere.
-            Battlin* battle = new Battlin(state, party->characters, baddie_party->characters);
-            current_battle_baddies = baddie_party;
-            if (goodie->x >= baddie->x) {
-              battle->good_direction = -1;
-            } else {
-              battle->good_direction = 1;
+  if (!timing.check("success_ending")) {
+    found_battle = false;
+    if (!timing.check("post_battle_grace") || 
+      timing.since("post_battle_grace") > hot_config.getFloat("game", "post_battle_grace_period")) {
+      for (WalkingParty* baddie_party : baddie_parties) {
+        for (WalkingCharacter* baddie : baddie_party->characters) {
+          for (WalkingCharacter* goodie : party->characters) {
+            if (baddie->hp > 0 && math_utils.distance(baddie->x, baddie->y, goodie->x, goodie->y) < battle_trigger_distance && !found_battle) {
+              found_battle = true;
+              // This will leak when it pops. Gotta delete it somewhere.
+              Battlin* battle = new Battlin(state, party->characters, baddie_party->characters);
+              current_battle_baddies = baddie_party;
+              if (goodie->x >= baddie->x) {
+                battle->good_direction = -1;
+              } else {
+                battle->good_direction = 1;
+              }
+              battle->initialize();
+              state->modes.push(battle);
             }
-            battle->initialize();
-            state->modes.push(battle);
           }
         }
       }
@@ -346,6 +371,13 @@ void Walkin::render() {
   //   graphics.setColor("#ffffff", 1.0 - timing.since("post_battle_grace"));
   //   graphics.drawImage("black_screen", 0, 0);
   // }
+
+  if (timing.check("success_ending")) {
+    float opacity = timing.since("success_ending") / 2.0;
+    if (opacity > 1.0) opacity = 1.0;
+    graphics.setColor("#ffffff", opacity);
+    graphics.drawImage("black_screen", 0, 0);
+  }
 }
 
 Walkin::~Walkin() {

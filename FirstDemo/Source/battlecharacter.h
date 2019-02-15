@@ -26,6 +26,7 @@ class BattleCharacter : public Character {
   void startAutomaticBattle(vector<BattleCharacter*> opposing_party);
   void startAttack();
   void continueAttack();
+  void startWalk();
 
   void draw();
   void drawPrepMode();
@@ -55,7 +56,7 @@ class BattleCharacter : public Character {
   float attack_jump_time;
   float attack_hold_time;
 
-  string action_state; // charging, ready, waiting, choosing, acting, skill, ko
+  string action_state; // charging, ready, waiting, choosing, acting, skill, walking, ko
 
   bool player_character;
 
@@ -73,5 +74,7 @@ class BattleCharacter : public Character {
 
   float magic_incantation_time;
   float magic_effect_time;
+
+  bool attack_using_skill;
 
 };

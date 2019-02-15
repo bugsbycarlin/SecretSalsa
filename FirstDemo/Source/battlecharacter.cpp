@@ -51,12 +51,27 @@ void BattleCharacter::startAutomaticBattle(vector<BattleCharacter*> opposing_par
       break;
     }
   }
+  int row = target->battle_row;
+  int col = target->battle_column;
+  // bug if the character is facing backwards but it's not worth handling now
+  for (BattleCharacter* character : opposing_party) {
+    if (character->hp > 0 && character->battle_row == row && 
+      ((character->direction == -1 && col == 1 && character->battle_column == 0)
+        || (character->direction == 1 && col == 0 && character->battle_column == 1))) {
+      // must target a closer character
+      target = character;
+    }
+  }
   if (target->hp > 0) {
     startAttack();
   } else {
     action_state = "charging";
     ap = 0;
   }
+}
+
+void BattleCharacter::startWalk() {
+  action_state = "walking";
 }
 
 void BattleCharacter::startAttack() {
@@ -103,14 +118,32 @@ void BattleCharacter::continueAttack() {
     if (target->battle_x == target->battle_home_x
       && target->battle_y == target->battle_home_y
       && math_utils.randomInt(0, 1000) > (target->dodge * 1000.0 + miss_check)) {
-      sound.playSound(name + "_attack", 1);
-      damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
-      if (damage_value < 1) damage_value = 1;
-      target->hp -= damage_value;
-      if (target->hp < 0) {
-        target->hp = 0;
+      if (skill == "Forage" && attack_using_skill == true) {
+        if (target->item != "None") {
+          for (int i = 0; i < state->item_names.size(); i++) {
+            if (target->item == state->item_names[i]) {
+              state->item_counts[i] += 1;
+            }
+          }
+          sound.playSound(name + "_attack", 1);
+          effects.makeTween("battle_item_use", 1.0, 0.0, 1.0);
+          effects.start("battle_item_use");
+          // very bad design
+          state->storeString("battle_item_use", target->item);
+          target->item = "None";
+        } else {
+          sound.playSound("miss", 1);
+        }
+      } else {
+        sound.playSound(name + "_attack", 1);
+        damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
+        if (damage_value < 1) damage_value = 1;
+        target->hp -= damage_value;
+        if (target->hp < 0) {
+          target->hp = 0;
+        }
+        timing.mark(target->unique_name + "_hurt");
       }
-      timing.mark(target->unique_name + "_hurt");
     } else {
       // MISS!
       damage_value = -1;
@@ -133,6 +166,8 @@ void BattleCharacter::continueAttack() {
 
 
   if (effects.finished(unique_name + "_attack_return_x")) {
+    state->storeString("battle_item_use", "");
+    attack_using_skill = false;
     effects.remove(unique_name + "_attack_return_x");
     effects.remove(unique_name + "_attack_jump_y");
     effects.remove(unique_name + "_attack_return_y");
@@ -160,6 +195,7 @@ void BattleCharacter::drawPrepMode() {
     effects.start("simple_bounce_walk_" + unique_name);
   }
 
+  graphics.setColor("#FFFFFF", 1.0);
   graphics.drawImage(
     animations[current_animation][current_frame],
     battle_x + margin_x,
@@ -177,6 +213,9 @@ void BattleCharacter::drawActiveMode() {
     || effects.busy(unique_name + "_attack_hold_move")
     || effects.busy(unique_name + "_attack_return_x"))) {
     setAnimation("attacking");
+  } else if (action_state == "walking") {
+    drawPrepMode();
+    return;
   } else if (action_state != "acting" && hp <= 0) {
     if (animations.count("ko") == 1) {
       setAnimation("ko");
@@ -292,6 +331,8 @@ void BattleCharacter::cloneFromCharacter(Character* character) {
   attack_max = character->attack_max;
   defense = character->defense;
   dodge = character->dodge;
+
+  item = character->item;
 
   skill = character->skill;
   skill_list = character->skill_list;

@@ -50,8 +50,8 @@
 
   <param type="string" name="battle_pace">one</param>
 
-  <param type="int" name="rain_delay_min">2</param>
-  <param type="int" name="rain_delay_max">14</param>
+  <param type="int" name="rain_delay_min">20</param>
+  <param type="int" name="rain_delay_max">140</param>
 
   <param type="float" name="dust_storm_speed">30</param>
 
@@ -75,7 +75,7 @@
   <param type="string" name="tune_bear_skill_list">n/a</param>
   <param type="string" name="tune_bear_ko_sound">ko_2</param>
 
-  <param type="int" name="witchycat_hp">109</param>
+  <param type="int" name="witchycat_hp">95</param>
   <param type="int" name="witchycat_sp">27</param>
   <param type="string" name="witchycat_display_name">Witchycat</param>
   <param type="float" name="witchycat_ap_rate">1.8</param>
@@ -118,7 +118,7 @@
   <param type="float" name="ko_countdown">20</param>
   <param type="float" name="post_battle_grace_period">3.0</param>
   
-  <param type="float" name="ap_delay">0.05</param>
+  <param type="float" name="ap_delay">0.1</param>
 
   <param type="float" name="default_battle_jump_time">0.5</param>
   <param type="float" name="default_battle_hold_time">0.2</param>
