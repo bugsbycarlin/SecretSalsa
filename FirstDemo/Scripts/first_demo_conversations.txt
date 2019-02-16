@@ -31,20 +31,20 @@ _conversation throwaway
 
 _conversation music_choice
   _choice Tune Bear: (To himself) Hmm, which music will Tune Bear use for this challenge?
-    _choice_value Galapaghost (Fast song, +Speed, +Agility)
-      _action music_choice = galapaghost
+    _choice_value Moonstone (Resolute, More HP)
+      _action music_choice = music_1
       _finish walking
-    _choice_value Super Brute Brothers (Resolute song, +Endurance, +HP)
-      _action music_choice = super_brute_brothers
+    _choice_value Saucefire (Berserk, High Critical Hit)
+      _action music_choice = music_2
       _finish walking
-    _choice_value The Vicious Venues (Berserk song, High Chance of Critical Hit)
-      _action music_choice = the_vicious_venues
+    _choice_value Pad Sanda (Focused, Items on All Enemies)
+      _action music_choice = music_3
       _finish walking
-    _choice_value Wimpsteed (Sad song, -Speed, -Enemy Attack)
-      _action music_choice = wimpsteed
+    _choice_value Wondertrade (Blind, Everyone Misses)
+      _action music_choice = music_4
       _finish walking
-    _choice_value The Books (Chill song, Immune to Rain)
-      _action music_choice = the_books
+    _choice_value Galapaghost (Chill, Slow Battles, No Battle Music)
+      _action music_choice = music_5
       _finish walking
 
 _conversation training_failure

@@ -26,6 +26,7 @@ Map::Map(string map_name) {
 
   graphics.addImages("Maps/", {
     map_name,
+    map_name + "_overlay",
   });
   this->map_name = map_name;
 
@@ -189,10 +190,6 @@ void Map::logic() {
         dust_field.push_back({start_x, start_y});
         dust_orig_x.push_back(start_x);
       }
-    } else if (!dust_storm) {
-      dust_field = {};
-      dust_targets = {};
-      dust_orig_x = {};
     }
 
     for (int i = 0; i < dust_field.size(); i++) {
@@ -200,6 +197,10 @@ void Map::logic() {
       if (dust_field[i].y > dust_targets[i].y) dust_field[i].y -= 4;
       // if (dust_field[i].y < dust_targets[i].y) dust_field[i].y += 4;
     }
+  } else {
+    dust_field = {};
+    dust_targets = {};
+    dust_orig_x = {};
   }
 }
 
@@ -225,6 +226,9 @@ void Map::draw(int x, int y) {
 
 void Map::overlayer(int x, int y) {
   graphics.setColor("#FFFFFF", 1.0);
+
+  graphics.drawImage(map_name + "_overlay", x, y);
+
   if (raining) {
     if (ice_shards) {
       for (position p : rain_field) {

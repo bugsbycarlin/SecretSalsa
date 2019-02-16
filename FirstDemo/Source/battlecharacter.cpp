@@ -138,6 +138,11 @@ void BattleCharacter::continueAttack() {
         sound.playSound(name + "_attack", 1);
         damage_value = math_utils.randomInt(attack_min, attack_max) - target->defense;
         if (damage_value < 1) damage_value = 1;
+        if (state->get("tune_bear_berserk") && name == "tune_bear") {
+          if (math_utils.randomInt(0, 100) > 40) {
+            damage_value *= 2;
+          }
+        }
         target->hp -= damage_value;
         if (target->hp < 0) {
           target->hp = 0;
@@ -265,6 +270,9 @@ void BattleCharacter::drawActiveMode() {
   }
 
   graphics.setColor("#FFFFFF", 1.0);
+  if (state->get("tune_bear_berserk") && name == "tune_bear") {
+    graphics.setColor("#FF0000", 1.0);
+  }
   graphics.drawImage(
     animations[current_animation][current_frame],
     battle_x + margin_x - direction * hurt_knockback,

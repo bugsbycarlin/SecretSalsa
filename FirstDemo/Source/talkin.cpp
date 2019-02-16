@@ -30,6 +30,8 @@ void Talkin::initialize() {
   conversation->setCurrentConversation("training_introduction");
   sound.stopMusic();
   sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
+
+  timing.mark("talking_fade_in");
 }
 
 void Talkin::logic() {
@@ -62,6 +64,7 @@ void Talkin::logic() {
   if (timing.since("conversation_fade_out") > 0.5 && conversation->finished) {
     if (conversation->finish_value == "walking") {
       state->refreshParty();
+      state->resetMusicEffects();
       state->store("laps", 0);
       state->modes.push(new Walkin(state));
       state->modes.top()->initialize();
@@ -86,6 +89,8 @@ void Talkin::render() {
     true, 0, -1, 1, 1
   );
 
+  state->map->overlayer(-state->camera_x, -state->camera_y);
+
   conversation->draw();
 
   if (conversation->finished && conversation->finish_value == "walking") {
@@ -96,6 +101,12 @@ void Talkin::render() {
   } else if (conversation->finished && conversation->finish_value == "fade") {
     graphics.setColor("#FFFFFF", timing.since("conversation_fade_out"));
     graphics.drawImage("black_screen", 0, 0);
+  }
+
+  if (timing.since("talking_fade_in") <= 0.5) {
+    int x = (int) -1280 * 2 * timing.since("talking_fade_in");
+    int y = (int) 720.0 * 2 * timing.since("talking_fade_in");
+    graphics.drawImage("black_screen", x, y);
   }
 }
 

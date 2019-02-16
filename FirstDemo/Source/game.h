@@ -14,6 +14,7 @@
 #include "honey.h"
 
 #include "mode.h"
+#include "intro.h"
 #include "walkin.h"
 #include "talkin.h"
 #include "battlin.h"

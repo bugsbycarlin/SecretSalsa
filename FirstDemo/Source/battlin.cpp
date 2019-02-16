@@ -25,6 +25,9 @@ void Battlin::initialize() {
   mode = "prep";
 
   ap_delay = hot_config.getFloat("game", "ap_delay");
+  if (state->has("slow_battles")) {
+    ap_delay *= 2;
+  }
 
   initializeCharacters();
   initializeMenus();
@@ -71,6 +74,10 @@ void Battlin::initializeCharacters() {
     bc->battle_direction = -1 * good_direction;
     bc->player_character = false;
 
+    if (state->has("all_blind")) {
+      bc->status_effects["blind"] = true;
+    }
+
     bc->attack_jump_time = hot_config.getFloat("game", "bigdog_battle_jump_time");
     bc->attack_hold_time = hot_config.getFloat("game", "bigdog_battle_hold_time");
 
@@ -93,6 +100,12 @@ void Battlin::initializeCharacters() {
     bc->battle_column = good_col;
     bc->battle_direction = good_direction;
     bc->player_character = true;
+
+    if (state->has("all_blind")) {
+      bc->status_effects["blind"] = true;
+    }
+
+    if (bc->hp <= 0) bc->hp = 1;
 
     position p = layouts.tile("battle_" + good_place + "_layout", bc->battle_column, bc->battle_row);
     bc->battle_x = g->x - state->camera_x;
@@ -136,7 +149,7 @@ void Battlin::logic() {
   //printf("Mode is %s\n", mode.c_str());
   if (mode == "prep") {
     if (!timing.check("music_down")) timing.mark("music_down");
-    if (hot_config.getBool("music", "switch_music_for_battle")) {
+    if (state->get("switch_music_for_battle") == 1) {
       if (timing.since("music_down") < 1) {
         float volume = 1.0;
         if (volume > hot_config.getFloat("music", "music_volume")) {
@@ -149,7 +162,7 @@ void Battlin::logic() {
     everybodyGetInPlace(); // mode might change to action
 
     if (mode == "action") { // it was just switched
-      if (hot_config.getBool("music", "switch_music_for_battle")) {
+      if (state->get("switch_music_for_battle") == 1) {
         sound.stopMusic();
         sound.playMusic("battle_fanfare", -1);
         float volume = 1.0;
@@ -217,8 +230,12 @@ void Battlin::logic() {
             character->startAutomaticBattle(player_party);
           }
         } else {
-          character->action_state = "waiting";
-          action_queue.push(character);
+          if (state->get("tune_bear_berserk") && character->name == "tune_bear") {
+            character->startAutomaticBattle(enemy_party);
+          } else {
+            character->action_state = "waiting";
+            action_queue.push(character);
+          }
         }
       }
     }
@@ -234,6 +251,11 @@ void Battlin::logic() {
       selection_column = 0;
       selection_state = 1;
       selection_card_1->setTextLines({"Attack", selection_character->skill, "Item", "Move"});
+      if (selection_character->skill == "Tapes") {
+        selection_card_1->setLineColor(1, "#CCCCCC");
+      } else {
+        selection_card_1->setLineColor(1, "#000000");
+      }
     }
   }
 
@@ -264,7 +286,7 @@ void Battlin::logic() {
     timing.mark("music_down");
   }
 
-  if (hot_config.getBool("music", "switch_music_for_battle") || player_defeated) {
+  if (state->get("switch_music_for_battle") == 1 || player_defeated) {
     if (mode == "finished" && timing.check("music_down")) {
       if (timing.since("music_down") < 1) {
         float volume = 1.0;
@@ -351,7 +373,7 @@ void Battlin::handleSelection() {
       if (selection_1 < 0) {
         selection_1 = selection_1_max;
       }
-    } else if (input.actionPressed("accept") > 0) {
+    } else if (input.actionPressed("accept") > 0 && !(selection_character->skill == "Tapes" && selection_1 == 1)) {
       sound.playSound("accept_sound", 1);
       // choose the choice!
       if (selection_1 == 0 ||
@@ -372,6 +394,8 @@ void Battlin::handleSelection() {
           int cost = hot_config.getInt("game", selection_character->skill_list[i] + "_cost");
           if (selection_character->sp < cost) {
             selection_card_2->setLineColor(i, "#CCCCCC");
+          } else {
+            selection_card_2->setLineColor(i, "#000000");
           }
         }
       } else if (selection_1 == 2) {
@@ -385,6 +409,8 @@ void Battlin::handleSelection() {
         for (int i = 0; i < state->item_counts.size(); i++) {
           if (state->item_counts[i] <= 0) {
             selection_card_2->setLineColor(i, "#CCCCCC");
+          } else {
+            selection_card_2->setLineColor(i, "#000000");
           }
         }
       } else if (selection_1 == 3) {
@@ -639,6 +665,15 @@ void Battlin::render() {
     }
   }
 
+  if (mode == "action" || mode == "finished") {
+    // This should be sorted by y value
+    for (BattleCharacter* character : everyone) {
+      character->drawActiveMode();
+    }
+  }
+
+  state->map->overlayer(-state->camera_x, -state->camera_y);
+
   // I think this is a dummy to keep checking and eventually finish the effect
   if (effects.busy("battle_item_use")) {
     float x = effects.tween("battle_item_use", effects.LINEAR);
@@ -659,7 +694,6 @@ void Battlin::render() {
   if (mode == "action" || mode == "finished") {
     // This should be sorted by y value
     for (BattleCharacter* character : everyone) {
-      character->drawActiveMode();
       if (effects.busy(character->unique_name + "_attack_hold_move") &&
         !(character->attack_using_skill && character->skill == "Forage")) {
         if (character->damage_value >= 0) {
@@ -699,8 +733,6 @@ void Battlin::render() {
   if (selection_character != NULL && mode == "action") {
     drawSelection();
   }
-
-  state->map->overlayer(-state->camera_x, -state->camera_y);
 
   if (mode == "finished") {
     black_screen->draw();
@@ -809,7 +841,7 @@ void Battlin::drawSelection() {
   }
 
   if (selection_state >= 2 && (selection_1 == 1 || selection_1 == 2)) {
-    if (selection_1 == 2 || selection_character->skill_list.size() > 0) {
+    if (selection_1 == 2 || selection_character->skill != "Forage") {
       selection_card_2_header->draw();
       selection_card_2->draw();
 

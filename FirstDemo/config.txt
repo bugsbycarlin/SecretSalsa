@@ -14,11 +14,11 @@
   <param type="int" name="player_starting_x">1328</param>
   <param type="int" name="player_starting_y">793</param>
 
-  <param type="int" name="coach_bulldog_x">680</param>
-  <param type="int" name="coach_bulldog_y">520</param>
+  <param type="int" name="coach_bulldog_x">580</param>
+  <param type="int" name="coach_bulldog_y">620</param>
 
-  <param type="int" name="tune_bear_x">980</param>
-  <param type="int" name="tune_bear_y">520</param>
+  <param type="int" name="tune_bear_x">780</param>
+  <param type="int" name="tune_bear_y">620</param>
 
   <param type="int" name="player_margin_x">0</param>
   <param type="int" name="player_margin_y">-50</param>
@@ -26,8 +26,8 @@
   <param type="int" name="player_battlin_x">800</param>
   <param type="int" name="player_battlin_y">450</param>
 
-  <param type="int" name="conversation_camera_x">60</param>
-  <param type="int" name="conversation_camera_y">40</param>
+  <param type="int" name="conversation_camera_x">160</param>
+  <param type="int" name="conversation_camera_y">180</param>
 
   <param type="int" name="baddie_starting_x">41</param>
   <param type="int" name="baddie_starting_y">852</param>
@@ -46,7 +46,7 @@
 </section>
 
 <section name="game">
-  <param type="string" name="starting_screen">walking</param>
+  <param type="string" name="starting_screen">intro</param>
 
   <param type="string" name="battle_pace">one</param>
 
@@ -118,7 +118,7 @@
   <param type="float" name="ko_countdown">20</param>
   <param type="float" name="post_battle_grace_period">3.0</param>
   
-  <param type="float" name="ap_delay">0.1</param>
+  <param type="float" name="ap_delay">0.05</param>
 
   <param type="float" name="default_battle_jump_time">0.5</param>
   <param type="float" name="default_battle_hold_time">0.2</param>
@@ -182,13 +182,13 @@
 
   <param type="int" name="lap_count_x">20</param>
   <param type="int" name="lap_count_y">20</param>
-  <param type="int" name="lap_count_width">95</param>
-  <param type="int" name="lap_count_height">32</param>
+  <param type="int" name="lap_count_width">225</param>
+  <param type="int" name="lap_count_height">105</param>
   <param type="string" name="lap_count_image_root">notebook_menu</param>
   <param type="int" name="lap_count_margin_x">10</param>
   <param type="int" name="lap_count_margin_y">1</param>
-  <param type="int" name="lap_count_num_lines">1</param>
-  <param type="int" name="lap_count_wrap_length">12</param>
+  <param type="int" name="lap_count_num_lines">4</param>
+  <param type="int" name="lap_count_wrap_length">20</param>
   <param type="bool" name="lap_count_typewriter">false</param>
   <param type="float" name="lap_count_typewriter_delay">0.03</param>
   <param type="string" name="lap_count_font_path">Fonts/IBMPlexMono-Bold.ttf</param>
@@ -306,13 +306,13 @@
 <section name="music">
   <param type="float" name="music_volume">1.0</param>
   <param type="float" name="sound_volume">1.0</param>
-  <param type="bool" name="switch_music_for_battle">true</param>
-  <param type="string" name="music_1">crepuscolo_su_saturno.mp3</param>
-  <param type="string" name="music_2">water.mp3</param>
-  <param type="string" name="music_3">sangue_su_callisto.mp3</param>
-  <param type="string" name="music_4">piano.mp3</param>
-  <param type="string" name="music_5">fog_burning_dawn.mp3</param>
-  <param type="string" name="battle">battle_fanfare.mp3</param>
+  <param type="string" name="switch_music_for_battle">true</param>
+  <param type="string" name="music_1">crepuscolo_su_saturno</param>
+  <param type="string" name="music_2">sangue_su_callisto</param>
+  <param type="string" name="music_3">deep_rough</param>
+  <param type="string" name="music_4">sunset_cove</param>
+  <param type="string" name="music_5">fog_burning_dawn</param>
+  <param type="string" name="battle">battle_fanfare</param>
 </section>
 
 <section name="animation">

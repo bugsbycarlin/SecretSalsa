@@ -24,6 +24,10 @@ int State::get(string label) {
   return values[label];
 }
 
+bool State::has(string label) {
+  return (values.count(label) == 1);
+}
+
 void State::storeString(string label, string value) {
   string_values[label] = value;
 }
@@ -33,6 +37,10 @@ string State::getString(string label) {
   return string_values[label];
 }
 
+bool State::hasString(string label) {
+  return (string_values.count(label) == 1);
+}
+
 void State::refreshParty() {
   for (PermanentCharacter* character : party) {
     character->hp = character->max_hp;
@@ -40,6 +48,14 @@ void State::refreshParty() {
   }
 
   map->raining = false;
+}
+
+void State::resetMusicEffects() {
+  values.erase("extra_hp");
+  values.erase("tune_bear_berserk");
+  values.erase("enemy_items");
+  values.erase("all_blind");
+  values.erase("slow_battles");
 }
 
 State::~State() {

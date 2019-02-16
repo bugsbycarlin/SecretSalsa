@@ -37,9 +37,10 @@ void Game::initialize() {
   input.addActionKey("left", "left");
   input.addActionKey("right", "right");
   input.addActionKey("accept", "a");
-  input.addActionKey("cancel", "z");
+  input.addActionKey("cancel", "s");
 
   graphics.addImages("Art/", {
+    "intro_screen",
     "bigdog_static",
     "bigdog_walk_2_3",
     "bigdog_walk_2_4",
@@ -113,9 +114,9 @@ void Game::initialize() {
 
   sound.addMusics("Music/", {
     "crepuscolo_su_saturno",
-    "water",
+    "deep_rough",
     "sangue_su_callisto",
-    "piano",
+    "sunset_cove",
     "fog_burning_dawn",
     "battle_fanfare",
     "game_over",
@@ -144,21 +145,16 @@ void Game::initialize() {
     "ice_shatter_4",
     "ice_shatter_5",
     "toot",
-    "dust"
+    "dust",
   });
 
-  state->music["galapaghost"] = "crepuscolo_su_saturno";
-  state->music["super_brute_brothers"] = "water";
-  state->music["the_vicious_venues"] = "sangue_su_callisto";
-  state->music["wimpsteed"] = "piano";
-  state->music["the_books"] = "fog_burning_dawn";
+  state->music["music_1"] = "crepuscolo_su_saturno";
+  state->music["music_2"] = "water";
+  state->music["music_3"] = "sangue_su_callisto";
+  state->music["music_4"] = "piano";
+  state->music["music_5"] = "fog_burning_dawn";
 
-  // For random picking
-  state->storeString("music_0", "galapaghost");
-  state->storeString("music_1", "super_brute_brothers");
-  state->storeString("music_2", "the_vicious_venues");
-  state->storeString("music_3", "wimpsteed");
-  state->storeString("music_4", "the_books");
+  state->store("switch_music_for_battle", 1);
 
   sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
   sound.setSoundVolume(hot_config.getFloat("music", "sound_volume"));
@@ -167,6 +163,8 @@ void Game::initialize() {
     state->modes.push(new Talkin(state));
   } else if (hot_config.getString("game", "starting_screen") == "walking") {
     state->modes.push(new Walkin(state));
+  } else if (hot_config.getString("game", "starting_screen") == "intro") {
+    state->modes.push(new Intro(state));
   }
   
   printf("Here 3\n");

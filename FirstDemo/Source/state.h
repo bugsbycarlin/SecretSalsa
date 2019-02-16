@@ -30,11 +30,14 @@ class State {
 
   void store(string label, int value);
   int get(string label);
+  bool has(string label);
 
   void storeString(string label, string value);
   string getString(string label);
+  bool hasString(string label);
 
   void refreshParty();
+  void resetMusicEffects();
 
   ~State();
 

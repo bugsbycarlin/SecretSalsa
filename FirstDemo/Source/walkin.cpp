@@ -21,6 +21,13 @@ void Walkin::initializeWalkingParty() {
   for (PermanentCharacter* p : state->party) {
     WalkingCharacter* character = new WalkingCharacter(state);
     character->cloneFromPermanentCharacter(p);
+
+    if (state->has("extra_hp")) {
+      character->max_hp = hot_config.getInt("game", character->name + "_hp") + 30;
+      character->hp = character->max_hp;
+      character->permanent_character->max_hp = character->max_hp;
+    }
+
     character->addAnimation("static", {p->name});
     character->addAnimation("ko", {p->name + "_ko"});
     character->addAnimation("hurt", {p->name + "_hurt"});
@@ -32,23 +39,6 @@ void Walkin::initializeWalkingParty() {
     }
     party->add(character);
   }
-
-  sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
-  if (state->string_values.count("music_choice") != 1) {
-    printf("No music chosen.\n");
-    state->string_values["music_choice"] = state->getString("music_" + to_string(math_utils.randomInt(0,5)));
-  }
-  printf("This is the song: %s\n", state->music[state->getString("music_choice")].c_str());
-  sound.playMusic(state->music[state->getString("music_choice")], -1);
-  
-  state->item_counts = {};
-  state->item_counts.push_back(hot_config.getInt("game", "chicken_start"));
-  state->item_counts.push_back(hot_config.getInt("game", "coffee_start"));
-  state->item_counts.push_back(hot_config.getInt("game", "honey_start"));
-  state->item_names = {};
-  state->item_names.push_back("Chicken");
-  state->item_names.push_back("Coffee");
-  state->item_names.push_back("Honey");
 }
 
 void Walkin::addBaddieParty() {
@@ -97,6 +87,9 @@ void Walkin::addBaddieParty() {
     baddie->max_ay *= max_ay_multiplier;
 
     int item_roll = math_utils.randomInt(0,60);
+    if (state->has("enemy_items")) {
+      item_roll = math_utils.randomInt(0,30);
+    }
     if (item_roll < 10) {
       baddie->item = "Chicken";
     } else if (item_roll < 20) {
@@ -146,6 +139,41 @@ void Walkin::initialize() {
     {203, 585, 133, 594},
     {352, 817, 301, 858}
   };
+
+
+  sound.setMusicVolume(hot_config.getFloat("music", "music_volume"));
+  if (state->string_values.count("music_choice") != 1) {
+    printf("No music chosen.\n");
+    state->storeString("music_choice", "music_" + to_string(math_utils.randomInt(1,6)));
+  }
+  printf("This is the song: %s\n", hot_config.getString("music", state->getString("music_choice")).c_str());
+  sound.playMusic(hot_config.getString("music", state->getString("music_choice")), -1);
+  if (state->getString("music_choice") == "music_5") {
+    state->store("switch_music_for_battle", 0);
+  } else {
+    state->store("switch_music_for_battle", 1);
+  }
+
+  if (state->getString("music_choice") == "music_1") {
+    state->store("extra_hp", 1);
+  } else if (state->getString("music_choice") == "music_2") {
+    state->store("tune_bear_berserk", 1);
+  } else if (state->getString("music_choice") == "music_3") {
+    state->store("enemy_items", 1);
+  } else if (state->getString("music_choice") == "music_4") {
+    state->store("all_blind", 1);
+  } else if (state->getString("music_choice") == "music_5") {
+    state->store("slow_battles", 1);
+  }
+  
+  state->item_counts = {};
+  state->item_counts.push_back(hot_config.getInt("game", "chicken_start"));
+  state->item_counts.push_back(hot_config.getInt("game", "coffee_start"));
+  state->item_counts.push_back(hot_config.getInt("game", "honey_start"));
+  state->item_names = {};
+  state->item_names.push_back("Chicken");
+  state->item_names.push_back("Coffee");
+  state->item_names.push_back("Honey");
 
   initializeWalkingParty();
   addBaddieParty();
@@ -231,7 +259,12 @@ void Walkin::cameraLogic() {
 }
 
 void Walkin::gameLogic() {
-  lap_count_box->setText(to_string(state->get("laps")) + (state->get("laps") == 1 ? " LAP" : " LAPS"));
+  lap_count_box->setTextLines({
+    to_string(state->get("laps")) + (state->get("laps") == 1 ? " Lap" : " Laps"),
+    "Tune Bear " + to_string(state->party[0]->hp) + "/" + to_string(state->party[0]->max_hp),
+    "Witchycat " + to_string(state->party[1]->hp) + "/" + to_string(state->party[1]->max_hp),
+    "Robin " + to_string(state->party[2]->hp) + "/" + to_string(state->party[2]->max_hp)
+  });
 
   // This happens if you survive battle. Comes after battle pop.
   if (found_battle) {
@@ -243,8 +276,8 @@ void Walkin::gameLogic() {
       character->cloneFromPermanentCharacter(character->permanent_character);
     }
     timing.mark("post_battle_grace");
-    if (hot_config.getBool("music", "switch_music_for_battle")) {
-      sound.playMusic(state->music[state->getString("music_choice")], -1);
+    if (state->get("switch_music_for_battle") == 1) {
+      sound.playMusic(hot_config.getString("music", state->getString("music_choice")), -1);
       float volume = 1.0;
       if (volume > hot_config.getFloat("music", "music_volume")) {
         volume = hot_config.getFloat("music", "music_volume");
