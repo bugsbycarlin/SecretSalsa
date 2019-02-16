@@ -1,0 +1,131 @@
+#!/usr/bin/python
+
+import argparse
+import os
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--name", action="store", required=True)
+parser.add_argument("--program", action="store", required=True)
+parser.add_argument("--extra_files", action="store", required=True)
+parser.add_argument("--icon", action="store", required=True)
+parser.add_argument("--output_path", action="store", required=True)
+
+args = parser.parse_args()
+name = args.name
+program = args.program
+extra_files = args.extra_files.split(",")
+icon = args.icon
+output_path = args.output_path
+
+
+
+######
+
+print "Making directories"
+
+def place(item):
+  return os.path.join(output_path, "%s.app" % name, item)
+
+os.system("mkdir -p %s" % place(""))
+os.system("mkdir -p %s" % place("Contents/MacOS"))
+os.system("mkdir -p %s" % place("Contents/Resources"))
+os.system("mkdir -p %s" % place("Contents/Frameworks"))
+
+
+
+######
+
+print "Writing Info.plist and launch file"
+
+info = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleGetInfoString</key>
+  <string>_name_</string>
+  <key>CFBundleExecutable</key>
+  <string>launch</string>
+  <key>CFBundleIdentifier</key>
+  <string>_name_</string>
+  <key>CFBundleName</key>
+  <string>_name_</string>
+  <key>CFBundleIconFile</key>
+  <string>_name_.icns</string>
+  <key>CFBundleShortVersionString</key>
+  <string>0.01</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>IFMajorVersion</key>
+  <integer>0</integer>
+  <key>IFMinorVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>
+"""
+
+with open(place("Contents/Info.plist"), "w") as infofile:
+  infofile.write(info.replace("_name_", name))
+
+
+launch = """#!/bin/bash
+cd "${0%/*}"
+./_program_
+"""
+
+with open(place("Contents/MacOS/launch"), "w") as launchfile:
+  launchfile.write(launch.replace("_program_", os.path.basename(program)))
+
+os.system("chmod +x %s" % place("Contents/MacOS/launch"))
+
+
+
+######
+
+print "Copying program files"
+
+os.system("cp -R %s %s" % (program, place("Contents/MacOS")))
+for path in extra_files:
+  os.system("cp -R %s %s" % (path, place("Contents/MacOS")))
+
+
+
+######
+
+print "Making icons"
+
+os.system("mkdir %s" % place("Contents/Resources/%s.iconset" % name))
+big_icon_path = place("Contents/Resources/%s.iconset/icon_512x512.png" % name)
+os.system("cp %s %s" % (icon, big_icon_path))
+for size in [16, 32, 128, 256]:
+  little_icon_path = place("Contents/Resources/%s.iconset/icon_%dx%d.png" % (name, size, size))
+  os.system("sips -z %d %d %s --out %s" % (size, size, big_icon_path, little_icon_path))
+
+os.system("iconutil -c icns -o %s %s" % (place("Contents/Resources/%s.icns" % name), place("Contents/Resources/%s.iconset" % name)))
+os.system("rm -rf %s" % place("Contents/Resources/%s.iconset" % name))
+
+
+
+######
+
+print "Copying and relinking frameworks"
+
+for framework in ["SDL2", "SDL2_image", "SDL2_mixer", "SDL2_ttf"]:
+  os.system("cp -R /Library/Frameworks/%s.framework %s" % (framework, place("Contents/Frameworks")))
+  os.system("install_name_tool -change @rpath/%s.framework/Versions/A/%s @executable_path/../Frameworks/%s.framework/Versions/A/%s %s" % (framework, framework, framework, framework, place("Contents/MacOS/%s" % os.path.basename(program))))
+
+# /usr/local/opt/boost/lib/libboost_filesystem-mt.dylib
+# /usr/local/opt/boost/lib/libboost_system-mt.dylib
+# but not /usr/lib/libc++.1.dylib
+# and not /usr/lib/libSystem.B.dylib
+for library_path in ["/usr/local/opt/boost/lib/libboost_filesystem-mt.dylib", "/usr/local/opt/boost/lib/libboost_system-mt.dylib"]:
+  os.system("cp -R %s %s" % (library_path, place("Contents/Frameworks")))
+  library_name = os.path.basename(os.path.normpath(library_path))
+  os.system("install_name_tool -change %s @executable_path/../Frameworks/%s %s" % (library_path, library_name, place("Contents/MacOS/%s" % os.path.basename(program))))
+
+
+######
+
+print "Done! Your app is an app."

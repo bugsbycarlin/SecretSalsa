@@ -45,8 +45,8 @@ void Walkin::addBaddieParty() {
   WalkingParty* baddie_party = new WalkingParty(state);
 
   float max_velocity = 4.0 + 5.0 * (math_utils.randomInt(0, 10) / 10.0);
-  float max_ax_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
-  float max_ay_multiplier = (0.8 + 0.4 * math_utils.randomInt(0, 10) / 10.0);
+  float max_ax_multiplier = (0.8 + 0.3 * math_utils.randomInt(0, 10) / 10.0);
+  float max_ay_multiplier = (0.8 + 0.6 * math_utils.randomInt(0, 10) / 10.0);
 
   int num_baddies_roll = math_utils.randomInt(0,20);
   int num_baddies = 2;
