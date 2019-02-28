@@ -1,0 +1,42 @@
+<section name="layout">
+  <param type="int" name="screen_width">1280</param>
+  <param type="int" name="screen_height">720</param>
+  <param type="bool" name="full_screen">false</param>
+
+  <param type="int" name="display_x">0</param>
+  <param type="int" name="display_y">436</param>
+</section>
+
+<section name="grass">
+  <param type="int" name="grass_y">971</param>
+
+  <!-- 18 is a fairly strong wind.-->
+  <param type="int" name="wind_strength">15</param>
+  
+  <!-- 550 per 100k pixels is a good amount here.-->
+  <param type="int" name="brush_stroke_count">1500</param>
+  
+  <!-- 20 is medium length grass.-->
+  <param type="int" name="brush_stroke_length">20</param>
+
+  <param type="int" name="brush_width">25</param>
+  <param type="int" name="brush_height">10</param>
+  <param type="int" name="brush_density">45</param>
+  <param type="float" name="brush_opacity">0.6</param>
+
+  <param type="float" name="brush_blend_factor">0.3</param>
+</section>
+
+<section name="menu">
+</section>
+
+<section name="music">
+</section>
+
+<section name="animation">
+  <!-- 0.1 is a strong wind. 0.05 is a very strong wind.-->
+  <param type="float" name="animation_delay">0.1</param>
+</section>
+
+
+
