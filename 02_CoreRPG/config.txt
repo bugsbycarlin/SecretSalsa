@@ -304,8 +304,8 @@
 </section>
 
 <section name="music">
-  <param type="float" name="music_volume">1.0</param>
-  <param type="float" name="sound_volume">1.0</param>
+  <param type="float" name="music_volume">0.0</param>
+  <param type="float" name="sound_volume">0.0</param>
   <param type="string" name="switch_music_for_battle">true</param>
   <param type="string" name="music_1">crepuscolo_su_saturno</param>
   <param type="string" name="music_2">sangue_su_callisto</param>
