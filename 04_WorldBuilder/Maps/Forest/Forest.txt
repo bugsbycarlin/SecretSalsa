@@ -1,0 +1,11 @@
+<sheets>
+forest_part_1
+</sheets>
+
+<layers>
+grass,path,water,walking,trees
+</layers>
+
+<doodads>
+bridge
+</doodads>

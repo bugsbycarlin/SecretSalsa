@@ -7,6 +7,10 @@
   <param type="int" name="display_y">436</param>
 </section>
 
+<section name="system">
+  <param type="string" name="map_root_folder">./Maps</param>
+</section>
+
 <section name="grass">
   <param type="int" name="grass_y">971</param>
 
@@ -28,6 +32,20 @@
 </section>
 
 <section name="menu">
+  <param type="int" name="choice_x">20</param>
+  <param type="int" name="choice_y">30</param>
+  <param type="int" name="choice_width">400</param>
+  <param type="int" name="choice_height">120</param>
+  <param type="string" name="choice_image_root">notebook_menu</param>
+  <param type="int" name="choice_margin_x">40</param>
+  <param type="int" name="choice_margin_y">10</param>
+  <param type="int" name="choice_num_lines">5</param>
+  <param type="int" name="choice_wrap_length">60</param>
+  <param type="bool" name="choice_typewriter">false</param>
+  <param type="float" name="choice_typewriter_delay">0.03</param>
+  <param type="string" name="choice_font_path">Fonts/avenir_black.ttf</param>
+  <param type="int" name="choice_font_size">25</param>
+  <param type="string" name="choice_font_color">#000000</param>
 </section>
 
 <section name="music">
