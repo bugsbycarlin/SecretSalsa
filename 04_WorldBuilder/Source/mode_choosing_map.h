@@ -27,7 +27,7 @@ class ModeChoosingMap : public Mode {
   void logic();
   void render();
 
-  void loadMap(string map_name);
+  //void loadMap(string map_name);
 
   ~ModeChoosingMap();
 

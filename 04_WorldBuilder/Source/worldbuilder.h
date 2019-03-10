@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <stack>
 #include <string>
 #include <vector>
@@ -16,6 +17,7 @@
 #include "nfd.h"
 
 #include "honey.h"
+#include "drawable.h"
 #include "map.h"
 #include "mode.h"
 #include "mode_choosing_map.h"
@@ -34,10 +36,13 @@ class WorldBuilder : public Screen {
   void logic();
   void render();
 
+  void generalLogic();
   void menuLogic();
   void cameraLogic();
   void layerLogic();
   void toolLogic();
+  void placementLogic();
+  void selectionLogic();
 
   void setMenuNewOrLoad();
   void setMenuAdd();
@@ -48,16 +53,14 @@ class WorldBuilder : public Screen {
 
   void loadNewPictureDialog();
 
-  void setMode(string mode_name, bool create_new);
-  void loadMap(string map_name);
+  void updateSelectionOverlay();
 
   ~WorldBuilder();
 
   Map* map;
 
-  std::map<string, Mode*> modes;
-
   string current_mode;
+  string current_sub_mode;
 
   string master_file_path;
   string master_file_name;
@@ -74,10 +77,21 @@ class WorldBuilder : public Screen {
   float camera_vy;
   const float camera_velocity_decay = 0.95;
 
+  string placement_image;
+  int placement_cursor_x;
+  int placement_cursor_y;
+
+  std::map<int, vector<Drawable*>> layers; 
+
   int layer_value;
 
   Textbox* camera_text;
   Textbox* layer_text;
+
+  Textbox* place_with_mouse_text;
+  Textbox* place_with_keyboard_text;
+
+  Textbox* current_info_text;
 
   int choice_value;
   int num_choices;
@@ -85,12 +99,37 @@ class WorldBuilder : public Screen {
   function<void()> choice_action;
   function<void()> cancel_action;
 
-  bool first_load = false;
+  bool place_images_with_mouse;
+
   const string MODE_MENU = "MODE_MENU";
   const string MODE_FREE_NAVIGATION = "MODE_FREE_NAVIGATION";
+  const string MODE_PLACEMENT = "MODE_PLACEMENT";
+  const string MODE_SELECTION = "MODE_SELECTION";
+  const string MODE_CALCULATION = "MODE_CALCULATION";
 
 
-  const string MODE_CHOOSING_MAP = "mode_choosing_map";
-  const string MODE_SELECTING = "mode_selecting";
-  const string MODE_TESTING = "mode_testing";
+  std::vector<std::vector<int>> pixel_status;
+
+  SDL_Surface* overlay_surface;
+
+  const Uint32 rmask = 0x00ff0000;
+  const Uint32 gmask = 0x0000ff00;
+  const Uint32 bmask = 0x000000ff;
+  const Uint32 amask = 0xff000000;
+
+  int map_width;
+  int map_height;
+
+  bool eraser;
+
+  int selection_cursor_x;
+  int selection_cursor_y;
+
+  const int max_stamp_radius = 100;
+  const int default_stamp_radius = 20;
+  int stamp_radius;
+
+  // const string MODE_CHOOSING_MAP = "mode_choosing_map";
+  // const string MODE_SELECTING = "mode_selecting";
+  // const string MODE_TESTING = "mode_testing";
 };

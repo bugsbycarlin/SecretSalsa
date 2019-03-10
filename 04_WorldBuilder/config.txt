@@ -39,7 +39,7 @@
   <param type="string" name="choice_image_root">notebook_menu</param>
   <param type="int" name="choice_margin_x">40</param>
   <param type="int" name="choice_margin_y">10</param>
-  <param type="int" name="choice_num_lines">5</param>
+  <param type="int" name="choice_num_lines">12</param>
   <param type="int" name="choice_wrap_length">60</param>
   <param type="bool" name="choice_typewriter">false</param>
   <param type="float" name="choice_typewriter_delay">0.03</param>

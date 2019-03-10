@@ -50,7 +50,7 @@ void ModeChoosingMap::logic() {
 
   if (input.actionPressed("accept") > 0) {
     sound.playSound("accept_sound", 1);
-    loadMap(map_choices[choice_value]);
+    //loadMap(map_choices[choice_value]);
   }
 }
 

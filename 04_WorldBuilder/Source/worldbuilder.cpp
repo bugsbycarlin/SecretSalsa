@@ -21,40 +21,74 @@ WorldBuilder::WorldBuilder() {
 
   camera_vx = 0;
   camera_vy = 0;
+
+  layer_value = 0;
+  layers[0] = {};
+
+  place_images_with_mouse = false;
 }
 
 void WorldBuilder::loop() {
   logic();
-
-  //modes[current_mode]->logic();
-
   render();
-
-  //modes[current_mode]->render();
 }
 
 void WorldBuilder::initialize() {
-  // state->screen_color = hot_config.getString("layout", "screen_color");
-  // state->screen_width = hot_config.getInt("layout", "screen_width");
-  // state->screen_height = hot_config.getInt("layout", "screen_height");
 
-  //map = new Map(hot_config.getString("layout", "map_name"));
+  map_width = 2000;
+  map_height = 1500;
 
+  if (overlay_surface != NULL) {
+    SDL_FreeSurface(overlay_surface);
+  }
+  overlay_surface = SDL_CreateRGBSurface(0, map_width, map_height, 32, rmask, gmask, bmask, amask);
+  graphics.addImageFromSurface("selection_overlay", overlay_surface);
+
+  pixel_status.resize(map_width);
+  for (int k = 0; k < map_width; k++) {
+    pixel_status[k].resize(map_height);
+  }
+
+  for (int k = 0; k < map_width; k++) {
+    for (int l = 0; l < map_height; l++) {
+      pixel_status[k][l] = 0;
+    }
+  }
+
+  stamp_radius = default_stamp_radius;
+
+  eraser = false;
+
+  selection_cursor_x = -1000;
+  selection_cursor_y = -1000;
 
   input.addActionKey("up", "up");
   input.addActionKey("down", "down");
   input.addActionKey("left", "left");
   input.addActionKey("right", "right");
-  input.addActionKey("accept", "a");
-  input.addActionKey("cancel", "s");
+  input.addActionKey("accept", "return");
+  input.addActionKey("cancel", "escape");
 
-  input.addActionKey("camera2", "right_command");
+  input.addActionKey("camera_2", "right_command");
   input.addActionKey("camera", "left_command");
 
   input.addActionKey("layer_down", "-");
   input.addActionKey("layer_up", "=");
 
+  input.addActionKey("stamp_radius_down", "-");
+  input.addActionKey("stamp_radius_up", "=");
+
   input.addActionKey("add", "a");
+  input.addActionKey("double", "d");
+  input.addActionKey("grass", "g");
+
+  input.addActionKey("fast_move", "left_alt");
+  input.addActionKey("fast_move_2", "right_alt");
+
+  input.addActionKey("use_mouse", "m");
+  input.addActionKey("use_keyboard", "k");
+
+  input.addActionKey("erase", "e");
 
   graphics.addImages("Art/", {
     "waiting_wheel_0",
@@ -63,6 +97,8 @@ void WorldBuilder::initialize() {
     "origin_x",
     "origin_o",
     "choice_arrow",
+    "cursor",
+    "eraser",
     "tune_bear",
     "robin",
     "witchycat"
@@ -91,6 +127,30 @@ void WorldBuilder::initialize() {
     "#000000"
   );
 
+  place_with_mouse_text = new Textbox(
+    "Fonts/avenir_black.ttf",
+    20,
+    "Place images with (M)ouse",
+    (position) {20, 660},
+    "#000000"
+  );
+
+  place_with_keyboard_text = new Textbox(
+    "Fonts/avenir_black.ttf",
+    20,
+    "Place images with (K)eyboard",
+    (position) {20, 680},
+    "#000000"
+  );
+
+  current_info_text = new Textbox(
+    "Fonts/avenir_black.ttf",
+    20,
+    "X",
+    (position) {680, 680},
+    "#000000"
+  );
+
   pictures = {"Add New"};
   picture_paths = {"_"};
 
@@ -104,7 +164,7 @@ void WorldBuilder::setMenuNewOrLoad() {
   choice_value = 0;
   num_choices = 2;
   choice_action = [this]() {
-    first_load = false;
+    current_sub_mode = "";
     if (choice_value == 0) {
       newMasterFileDialog();
     } else if (choice_value == 1) {
@@ -114,7 +174,7 @@ void WorldBuilder::setMenuNewOrLoad() {
   cancel_action = [this]() {
     setMenuNewOrLoad();
   };
-  first_load = true;
+  current_sub_mode = "first";
   current_mode = MODE_MENU;
 }
 
@@ -125,9 +185,15 @@ void WorldBuilder::setMenuAdd() {
   choice_action = [this]() {
     if (choice_value == 0) {
       loadNewPictureDialog();
-    } else if (choice_value == 1) {
+    } else {
+
+      graphics.addImage(pictures[choice_value], picture_paths[choice_value]);
+      placement_image = pictures[choice_value];
+      placement_cursor_x = 640 + camera_x;
+      placement_cursor_y = 360 + camera_y;
+
       //loadMasterFileDialog();
-      current_mode = MODE_FREE_NAVIGATION;
+      current_mode = MODE_PLACEMENT;
     }
   };
   cancel_action = [this]() {
@@ -188,20 +254,13 @@ void WorldBuilder::loadNewPictureDialog() {
   nfdchar_t *outPath = NULL;
   nfdresult_t result = NFD_OpenDialog("png", NULL, &outPath);
   if (result == NFD_OKAY) {
-    // master_file_path.assign(outPath);
-    // boost::filesystem::path path(master_file_path);
-    // master_file_name.assign(path.filename().c_str());
-    // master_file_folder.assign(path.parent_path().c_str());
-    // free(outPath);
-    // initalizeFromMasterFile();
-
     string new_picture_path(outPath);
     boost::filesystem::path path(new_picture_path);
     string new_picture_name(path.stem().c_str());
     pictures.push_back(new_picture_name);
     picture_paths.push_back(new_picture_path);
-    num_choices = pictures.size();
-    current_mode = MODE_FREE_NAVIGATION;
+    setMenuAdd();
+    input.lockInput(0.3);
   }
   else if (result == NFD_CANCEL) {
     puts("User pressed cancel.");
@@ -212,18 +271,28 @@ void WorldBuilder::loadNewPictureDialog() {
   }
 }
 
-void WorldBuilder::setMode(string mode_name, bool create_new) { 
-  current_mode = mode_name;
+void WorldBuilder::updateSelectionOverlay() {
+  SDL_LockSurface(overlay_surface);
+  unsigned int *overlay_ptr = (unsigned int*)overlay_surface->pixels;
 
-  if (create_new) {
-    if (current_mode == MODE_CHOOSING_MAP) {
-      modes[current_mode] = new ModeChoosingMap(this);
-    } else if (current_mode == MODE_SELECTING) {
-      modes[current_mode] = new ModeSelecting(map);
+  for (int k = 0; k < map_width; k++) {
+    for (int l = 0; l < map_height; l++) {
+      int overlay_offset = l * overlay_surface->w;
+      Uint32 mask = 0x77111111;
+      if (pixel_status[k][l] == 1) {
+        mask = 0x00111111;
+      } else if (pixel_status[k][l] == 2) {
+        mask = 0x44111111;
+      }
+
+      overlay_ptr[overlay_offset + k] = mask;
     }
-
-    modes[current_mode]->initialize();
   }
+
+  SDL_UnlockSurface(overlay_surface);
+
+  graphics.removeImage("selection_overlay");
+  graphics.addImageFromSurface("selection_overlay", overlay_surface);
 }
 
 void WorldBuilder::logic() {
@@ -235,28 +304,37 @@ void WorldBuilder::logic() {
     screenmanager.setQuit();
   }
 
-  if (current_mode == MODE_MENU) {
-    menuLogic();
+  generalLogic();
+  if (current_mode != MODE_SELECTION) {
+    layerLogic();
   }
 
-  if (current_mode != MODE_MENU) {
+  if (current_mode == MODE_MENU) {
+    menuLogic();
+  } else if (current_mode != MODE_MENU) {
     cameraLogic();
-    layerLogic();
-    toolLogic();
+    
+    if (current_mode == MODE_FREE_NAVIGATION) {
+      toolLogic();
+    } else if (current_mode == MODE_PLACEMENT) {
+      placementLogic();
+    } else if (current_mode == MODE_SELECTION) {
+      selectionLogic();
+    }
   }
 }
 
 void WorldBuilder::cameraLogic() {
-  if ((input.actionDown("camera") || input.actionDown("camera2")) && input.actionDown("left")) {
+  if ((input.actionDown("camera") || input.actionDown("camera_2")) && input.actionDown("left")) {
     camera_vx -= 1;
   }
-  if ((input.actionDown("camera") || input.actionDown("camera2")) && input.actionDown("right")) {
+  if ((input.actionDown("camera") || input.actionDown("camera_2")) && input.actionDown("right")) {
     camera_vx += 1;
   }
-  if ((input.actionDown("camera") || input.actionDown("camera2")) && input.actionDown("up")) {
+  if ((input.actionDown("camera") || input.actionDown("camera_2")) && input.actionDown("up")) {
     camera_vy -= 1;
   }
-  if ((input.actionDown("camera") || input.actionDown("camera2")) && input.actionDown("down")) {
+  if ((input.actionDown("camera") || input.actionDown("camera_2")) && input.actionDown("down")) {
     camera_vy += 1;
   }
   camera_x += camera_vx;
@@ -293,15 +371,31 @@ void WorldBuilder::menuLogic() {
   }
 }
 
+void WorldBuilder::generalLogic() {
+  if (input.actionPressed("use_mouse") > 0) {
+    place_images_with_mouse = true;
+  }
+
+  if (input.actionPressed("use_keyboard") > 0) {
+    place_images_with_mouse = false;
+  }
+}
+
 void WorldBuilder::layerLogic() {
   if (input.actionPressed("layer_up") > 0) {
     sound.playSound("select_sound", 1);
     layer_value += 1;
+    if (layers.count(layer_value) != 1) {
+      layers[layer_value] = {};
+    }
   }
 
   if (input.actionPressed("layer_down") > 0) {
     sound.playSound("select_sound", 1);
     layer_value -= 1;
+    if (layers.count(layer_value) != 1) {
+      layers[layer_value] = {};
+    }
   }
 }
 
@@ -309,27 +403,106 @@ void WorldBuilder::toolLogic() {
   if (input.actionPressed("add") > 0) {
     sound.playSound("accept_sound", 1);
     setMenuAdd();
+  } else if (input.actionPressed("double") > 0) {
+    if (placement_image != "") {
+      placement_cursor_x = 640 + camera_x;
+      placement_cursor_y = 360 + camera_y;
+
+      //loadMasterFileDialog();
+      current_mode = MODE_PLACEMENT;
+    }
+  } else if (input.actionPressed("grass") > 0) {
+    updateSelectionOverlay();
+    current_sub_mode = "grass";
+    current_mode = MODE_SELECTION;
   }
 }
 
-void WorldBuilder::loadMap(string map_name) {
-  this->map_name = map_name;
+void WorldBuilder::placementLogic() {
+  if (place_images_with_mouse) {
+    vector<mouseEvent> mouse_events = input.getMouseEvents();
+    for (mouseEvent event : mouse_events) {
+      placement_cursor_x = event.x + camera_x;
+      placement_cursor_y = event.y + camera_y;
+      if (event.button == "left") {
+        int x = event.x + camera_x;
+        int y = event.y + camera_y;
+        layers[layer_value].push_back(new Drawable(placement_image, x, y));
+        current_mode = MODE_FREE_NAVIGATION;
+      }
+    }
+  } else {
+    if (input.actionDown("camera") || input.actionDown("camera_2")) {
+      return;
+    }
+    int move_scale = 1;
+    if (input.actionDown("fast_move") || input.actionDown("fast_move_2")) {
+      move_scale = 10;
+    }
+    if (input.actionDown("left")) {
+      placement_cursor_x -= move_scale;
+    }
+    if (input.actionDown("right")) {
+      placement_cursor_x += move_scale;
+    }
+    if (input.actionDown("up")) {
+      placement_cursor_y -= move_scale;
+    }
+    if (input.actionDown("down")) {
+      placement_cursor_y += move_scale;
+    }
 
-  map = new Map(this->map_name);
-
-  setMode(MODE_SELECTING, true);
+    if (input.actionPressed("accept") > 0) {
+      layers[layer_value].push_back(new Drawable(placement_image, placement_cursor_x, placement_cursor_y));
+      current_mode = MODE_FREE_NAVIGATION;
+    }
+  }
 }
 
-void ModeChoosingMap::loadMap(string map_name) {
-  worldbuilder->loadMap(map_name);
+void WorldBuilder::selectionLogic() {
+  vector<mouseEvent> mouse_events = input.getMouseEvents();
+  for (mouseEvent event : mouse_events) {
+    selection_cursor_x = event.x;
+    selection_cursor_y = event.y;
+    if (event.button == "left") {
+      int x = event.x + camera_x;
+      int y = event.y + camera_y;
+      for (int k = x - stamp_radius; k < x + stamp_radius; k++) {
+        for (int l = y - stamp_radius; l < y + stamp_radius; l++) {
+          if (k >= 0 && k < map_width && l >= 0 && l < map_height) {
+            if (math_utils.distance(x,y,k,l) <= stamp_radius) {
+              pixel_status[k][l] = 1;
+              if (eraser) pixel_status[k][l] = 0;
+            }
+          }
+        }
+      }
+      updateSelectionOverlay();
+    }
+  }
+
+  if (input.actionPressed("erase") > 0) {
+    eraser = !eraser;
+  }
+
+  if (input.keyPressed("=") > 0) {
+    if (stamp_radius <= max_stamp_radius) stamp_radius += 5;
+  }
+
+  if (input.keyPressed("-") > 0) {
+    if (stamp_radius > 5) stamp_radius -= 5;
+  }
 }
 
 void WorldBuilder::render() {
   // Clear the screen to a soft white color
   graphics.clearScreen("#808080");
   graphics.setLayer(0.0);
+  graphics.setColor("#FFFFFF", 1.0);
 
-  if (!first_load) {
+  if (current_sub_mode != "first") {
+    graphics.useOrderBasedLayers();
+    graphics.setLayer(-40.0);
     for (int i = -1; i < 14; i++) {
       for (int j = -1; j < 9; j++) {
         graphics.drawImage("grid_lines", 100 * i - camera_x % 100, 100 * j - camera_y % 100);
@@ -341,13 +514,66 @@ void WorldBuilder::render() {
     camera_text->setText(to_string(camera_x) + "," + to_string(camera_y));
     camera_text->draw();
 
+    graphics.setColor("#FFFFFF", 1.0);
+    graphics.usePositionBasedLayers();
+    for (std::pair<int, vector<Drawable*>> element : layers) {
+      int current_layer = element.first;
+      vector<Drawable*> items = element.second;
+      graphics.setLayer(current_layer);
+      for (Drawable* item : items) {
+        item->draw(camera_x, camera_y);
+      }
+    }
+
+    graphics.useOrderBasedLayers();
+    if (current_mode == MODE_PLACEMENT) {
+      graphics.setLayer(39.0);
+      graphics.setColor("#FFFFFF", 0.4);
+      graphics.drawImage(placement_image, placement_cursor_x - camera_x, placement_cursor_y - camera_y, true, 0, 1);
+      graphics.setColor("#FFFFFF", 1.0);
+    }
+
+    if (current_mode == MODE_SELECTION) {
+      graphics.setLayer(39.0);
+      graphics.drawImage("selection_overlay", -camera_x, -camera_y);
+
+      graphics.drawImage((eraser) ? "eraser" : "cursor", selection_cursor_x, selection_cursor_y, true, 0, stamp_radius / 50.0);
+    }
+
     graphics.setLayer(40.0);
+
+    if (place_images_with_mouse) {
+      place_with_mouse_text->setColor("#000000");
+      place_with_keyboard_text->setColor("#777777");
+    } else {
+      place_with_mouse_text->setColor("#777777");
+      place_with_keyboard_text->setColor("#000000");
+    }
+    place_with_mouse_text->draw();
+    place_with_keyboard_text->draw();
+    
     layer_text->setText("Layer " + to_string(layer_value));
     layer_text->draw();
+
+    if (current_mode == MODE_FREE_NAVIGATION) {
+      current_info_text->setText("Navigate using Cmd-Left, Cmd-Right, Cmd-Up, Cmd-Down");
+    } else if (current_mode == MODE_PLACEMENT) {
+      current_info_text->setText("Placing image at " + to_string(placement_cursor_x) + "," + to_string(placement_cursor_y));
+    } else if (current_mode == MODE_SELECTION && current_sub_mode == "grass") {
+      string grass_text = eraser ? "Select a region to grassify. Press (E) for Stamp" : "Select a region to grassify. Press (E) for Eraser";
+      current_info_text->setText(grass_text);
+    } else if (current_mode == MODE_CALCULATION && current_sub_mode == "grass") {
+      current_info_text->setText("Grassifying region...");
+    } else {
+      current_info_text->setText(" ");
+    }
+    current_info_text->draw();
   }
+  
 
   if (current_mode == MODE_MENU) {
-    graphics.setLayer(1.0);
+    graphics.useOrderBasedLayers();
+    graphics.setLayer(40.0);
     choice_box->draw();
 
     graphics.drawImage(
@@ -356,14 +582,6 @@ void WorldBuilder::render() {
       hot_config.getInt("menu", "choice_y") + hot_config.getInt("menu", "choice_margin_y") + 4 + 28 * choice_value
     );
   }
-
-
-  // graphics.usePositionBasedLayers();
-
-  // for (int i = 0; i < 10; i++) {
-  //   //graphics.setLayer((600 - 50 * i));
-  //   graphics.drawImage("tune_bear", 300, 300 - 50 * i);
-  // }
 }
 
 WorldBuilder::~WorldBuilder() {
