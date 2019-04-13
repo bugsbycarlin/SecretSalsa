@@ -9,7 +9,7 @@
 using namespace std;
 using namespace Honey;
 
-void debug(int x) {
+void wdb(int x) {
   printf("Here %d\n", x);
 }
 
@@ -25,6 +25,8 @@ WorldBuilder::WorldBuilder() {
   layer_value = 0;
   layers[0] = {};
 
+  grassObjects = {};
+
   place_images_with_mouse = false;
 }
 
@@ -35,8 +37,8 @@ void WorldBuilder::loop() {
 
 void WorldBuilder::initialize() {
 
-  map_width = 2000;
-  map_height = 1500;
+  map_width = hot_config.getInt("layout", "selection_width");
+  map_height = hot_config.getInt("layout", "selection_height");
 
   if (overlay_surface != NULL) {
     SDL_FreeSurface(overlay_surface);
@@ -44,14 +46,14 @@ void WorldBuilder::initialize() {
   overlay_surface = SDL_CreateRGBSurface(0, map_width, map_height, 32, rmask, gmask, bmask, amask);
   graphics.addImageFromSurface("selection_overlay", overlay_surface);
 
-  pixel_status.resize(map_width);
+  selection_pixels.resize(map_width);
   for (int k = 0; k < map_width; k++) {
-    pixel_status[k].resize(map_height);
+    selection_pixels[k].resize(map_height);
   }
 
   for (int k = 0; k < map_width; k++) {
     for (int l = 0; l < map_height; l++) {
-      pixel_status[k][l] = 0;
+      selection_pixels[k][l] = 0;
     }
   }
 
@@ -279,9 +281,9 @@ void WorldBuilder::updateSelectionOverlay() {
     for (int l = 0; l < map_height; l++) {
       int overlay_offset = l * overlay_surface->w;
       Uint32 mask = 0x77111111;
-      if (pixel_status[k][l] == 1) {
+      if (selection_pixels[k][l] == 1) {
         mask = 0x00111111;
-      } else if (pixel_status[k][l] == 2) {
+      } else if (selection_pixels[k][l] == 2) {
         mask = 0x44111111;
       }
 
@@ -412,6 +414,11 @@ void WorldBuilder::toolLogic() {
       current_mode = MODE_PLACEMENT;
     }
   } else if (input.actionPressed("grass") > 0) {
+    for (int k = 0; k < map_width; k++) {
+      for (int l = 0; l < map_height; l++) {
+        selection_pixels[k][l] = 0;
+      }
+    }
     updateSelectionOverlay();
     current_sub_mode = "grass";
     current_mode = MODE_SELECTION;
@@ -471,8 +478,8 @@ void WorldBuilder::selectionLogic() {
         for (int l = y - stamp_radius; l < y + stamp_radius; l++) {
           if (k >= 0 && k < map_width && l >= 0 && l < map_height) {
             if (math_utils.distance(x,y,k,l) <= stamp_radius) {
-              pixel_status[k][l] = 1;
-              if (eraser) pixel_status[k][l] = 0;
+              selection_pixels[k][l] = 1;
+              if (eraser) selection_pixels[k][l] = 0;
             }
           }
         }
@@ -492,6 +499,27 @@ void WorldBuilder::selectionLogic() {
   if (input.keyPressed("-") > 0) {
     if (stamp_radius > 5) stamp_radius -= 5;
   }
+
+  if (input.actionPressed("accept") > 0) {
+    current_mode = MODE_CALCULATION;
+    render();
+    graphics.updateDisplay();
+    GrassMaker* g = new GrassMaker(selection_pixels, [this](int calc_value) {
+      wait_step += 1;
+      wait_step = wait_step % 2;
+      graphics.setLayer(40.0);
+      graphics.setColor("#FFFFFF", 1.0);
+      graphics.drawImage("waiting_wheel_" + to_string(wait_step), 1280 - 100, 60);
+      graphics.updateDisplay();
+    });
+
+    layers[layer_value].push_back(g->result);
+    grassObjects.push_back(g->result);
+
+    delete g;
+
+    current_mode = MODE_FREE_NAVIGATION;
+  }
 }
 
 void WorldBuilder::render() {
@@ -500,8 +528,10 @@ void WorldBuilder::render() {
   graphics.setLayer(0.0);
   graphics.setColor("#FFFFFF", 1.0);
 
+  graphics.usePositionBasedLayers();
+
   if (current_sub_mode != "first") {
-    graphics.useOrderBasedLayers();
+    //graphics.useOrderBasedLayers();
     graphics.setLayer(-40.0);
     for (int i = -1; i < 14; i++) {
       for (int j = -1; j < 9; j++) {
@@ -510,12 +540,8 @@ void WorldBuilder::render() {
     }
     graphics.drawImage("origin_x", -camera_x, -camera_y, true, 0, 1);
     graphics.drawImage("origin_o", 0, 0, true, 0, 1);
-    
-    camera_text->setText(to_string(camera_x) + "," + to_string(camera_y));
-    camera_text->draw();
 
     graphics.setColor("#FFFFFF", 1.0);
-    graphics.usePositionBasedLayers();
     for (std::pair<int, vector<Drawable*>> element : layers) {
       int current_layer = element.first;
       vector<Drawable*> items = element.second;
@@ -525,22 +551,23 @@ void WorldBuilder::render() {
       }
     }
 
-    graphics.useOrderBasedLayers();
+    graphics.setLayer(39.0);
+    //graphics.useOrderBasedLayers();
     if (current_mode == MODE_PLACEMENT) {
-      graphics.setLayer(39.0);
       graphics.setColor("#FFFFFF", 0.4);
       graphics.drawImage(placement_image, placement_cursor_x - camera_x, placement_cursor_y - camera_y, true, 0, 1);
       graphics.setColor("#FFFFFF", 1.0);
     }
 
     if (current_mode == MODE_SELECTION) {
-      graphics.setLayer(39.0);
       graphics.drawImage("selection_overlay", -camera_x, -camera_y);
-
+      graphics.setLayer(40.0);
       graphics.drawImage((eraser) ? "eraser" : "cursor", selection_cursor_x, selection_cursor_y, true, 0, stamp_radius / 50.0);
     }
 
     graphics.setLayer(40.0);
+    camera_text->setText(to_string(camera_x) + "," + to_string(camera_y));
+    camera_text->draw();
 
     if (place_images_with_mouse) {
       place_with_mouse_text->setColor("#000000");

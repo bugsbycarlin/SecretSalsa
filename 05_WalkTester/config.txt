@@ -1,0 +1,13 @@
+<section name="layout">
+  <param type="int" name="screen_width">1280</param>
+  <param type="int" name="screen_height">720</param>
+  <param type="bool" name="full_screen">false</param>
+</section>
+
+<section name="walk">
+  <param type="int" name="starting_x">100</param>
+  <param type="int" name="starting_y">450</param>  
+
+  <param type="int" name="step_width">90</param>
+  <param type="float" name="frame_delay">0.2</param>
+</section>

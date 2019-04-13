@@ -3,8 +3,8 @@
   <param type="int" name="screen_height">720</param>
   <param type="bool" name="full_screen">false</param>
 
-  <param type="int" name="display_x">0</param>
-  <param type="int" name="display_y">436</param>
+  <param type="int" name="selection_width">2000</param>
+  <param type="int" name="selection_height">1500</param>
 </section>
 
 <section name="system">
@@ -19,6 +19,9 @@
   
   <!-- 550 per 100k pixels is a good amount here.-->
   <param type="int" name="brush_stroke_count">1500</param>
+
+  <!-- So we set that as a density here.-->
+  <param type="float" name="brush_stroke_density">0.0055</param>
   
   <!-- 20 is medium length grass.-->
   <param type="int" name="brush_stroke_length">20</param>
@@ -29,6 +32,8 @@
   <param type="float" name="brush_opacity">0.6</param>
 
   <param type="float" name="brush_blend_factor">0.3</param>
+
+  <param type="string" name="grass_colors">#32a66a,#23945f,#20955e,#40a270,#31a269,#3eac70,#36a96c,#84b365,#438e59,#2b854d,#34a36a,#329b68,#3a9f6e,#2d9b66,#35a86c,#33aa6a,#2b9a65,#2c9a65,#34a96b,#2fa268,#3ba86f,#319a68,#319c68,#2ea267,#319d67,#269862,#2c9665,#35a76b,#2c9d66,#2a9e65,#37a96d,#48ad78,#19965c</param>
 </section>
 
 <section name="menu">
@@ -46,9 +51,6 @@
   <param type="string" name="choice_font_path">Fonts/avenir_black.ttf</param>
   <param type="int" name="choice_font_size">25</param>
   <param type="string" name="choice_font_color">#000000</param>
-</section>
-
-<section name="music">
 </section>
 
 <section name="animation">

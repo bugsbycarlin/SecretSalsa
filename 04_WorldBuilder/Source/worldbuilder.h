@@ -18,6 +18,8 @@
 
 #include "honey.h"
 #include "drawable.h"
+#include "grass_maker.h"
+
 #include "map.h"
 #include "mode.h"
 #include "mode_choosing_map.h"
@@ -81,9 +83,13 @@ class WorldBuilder : public Screen {
   int placement_cursor_x;
   int placement_cursor_y;
 
-  std::map<int, vector<Drawable*>> layers; 
+  std::map<int, vector<Drawable*>> layers;
+
+  vector<Drawable*> grassObjects;
 
   int layer_value;
+
+  int wait_step;
 
   Textbox* camera_text;
   Textbox* layer_text;
@@ -108,7 +114,7 @@ class WorldBuilder : public Screen {
   const string MODE_CALCULATION = "MODE_CALCULATION";
 
 
-  std::vector<std::vector<int>> pixel_status;
+  std::vector<std::vector<int>> selection_pixels;
 
   SDL_Surface* overlay_surface;
 
